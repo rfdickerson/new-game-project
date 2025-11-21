@@ -6,8 +6,9 @@ This project demonstrates dynamic mesh generation in Godot 4.5, featuring a Civi
 
 - **Hexagonal Grid System**: Civilization-style hex tiles with customizable size, colors, and spacing
 - **Procedural Terrain Generation**: Realistic land/water maps using Perlin noise
-- **Multiple Terrain Types**: Water (deep/shallow), sand, grass, forest, and mountains
-- **Dynamic Water Plane**: Animated water with wave effects
+- **Smart Water Integration**: Water hexagons are skipped - animated water plane shows through
+- **Multiple Terrain Types**: Sand, grass, forest, and mountains with elevation
+- **Dynamic Water Plane**: Animated water with wave effects visible through terrain
 - **Elevation System**: Different hex heights based on terrain type
 - **Runtime Modification**: Adjust properties during gameplay with keyboard controls
 
@@ -68,11 +69,12 @@ The `HexagonGrid` has these exported properties:
 - **noise_seed**: Random seed for generation (0 = random each time)
 
 **Colors:**
-- **color_water**: Deep water color
-- **color_sand**: Beach/sand color
+- **color_sand**: Beach/sand color (coastline)
 - **color_grass**: Grassland color
 - **color_forest**: Forest color
 - **color_mountain**: Mountain/high elevation color
+
+Note: Water areas don't use hexagons - the animated water plane shows through naturally.
 
 Example code:
 
@@ -115,8 +117,10 @@ The hexagonal grid uses **flat-top orientation** (like Civilization games):
 **Procedural Terrain Generation:**
 - Uses FastNoiseLite (Perlin noise) for natural-looking landmasses
 - Terrain types assigned based on noise height values
-- Water tiles positioned lower, mountains higher for realistic elevation
-- Smooth transitions between biomes (shallow water, beaches, etc.)
+- **Water areas skip hexagon generation** - animated water plane shows through
+- Only land hexagons are rendered (sand, grass, forest, mountains)
+- Land tiles have varying elevation for realistic depth
+- Creates natural coastlines and island formations
 
 ### Water Plane
 
@@ -131,8 +135,9 @@ Creates a subdivided plane mesh using Godot's `ArrayMesh`:
 ## Performance Notes
 
 **Hexagon Grid:**
-- 12x12 grid = 144 hexagons with ~2,000 vertices
+- 16x16 grid typically generates 100-150 land hexagons (varies by land percentage)
 - All hexagons are in a single mesh for optimal rendering
+- Water areas don't generate geometry - better performance
 - Regenerating the mesh is fast enough for gameplay adjustments
 - For clicking individual hexagons, implement raycasting
 

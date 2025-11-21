@@ -8,6 +8,11 @@ extends MeshInstance3D
 @export var gap_size: float = 0.02  ## Gap between hexagons
 @export var auto_generate: bool = true
 
+## Simple baked-in ambient occlusion for the hex tiles (vertex color darkening)
+@export var ao_enabled: bool = true
+@export var ao_edge_intensity: float = 0.3  ## How dark the outer rim of the top face becomes (0–1)
+@export var ao_bottom_intensity: float = 0.6  ## How dark the underside becomes (0–1)
+
 ## Colors for different terrain types
 @export var color_water: Color = Color(0.2, 0.4, 0.8, 0.7)
 @export var color_grass: Color = Color(0.3, 0.7, 0.3, 0.9)
@@ -36,13 +41,18 @@ func generate_hex_grid():
 	
 	var vertex_offset = 0
 	
-	# Hexagon dimensions (flat-top orientation like Civilization)
-	var hex_width = hex_radius * 2.0
-	var hex_height_2d = sqrt(3.0) * hex_radius
+	# Hexagon dimensions for FLAT-TOP layout (angle starts at 30°):
+	# - Radius = distance from center to VERTEX
+	# - Width  = sqrt(3) * r
+	# - Height = 2 * r
+	var hex_width = sqrt(3.0) * hex_radius
+	var hex_height_2d = 2.0 * hex_radius
 	
-	# Spacing between hexagons
-	var horizontal_spacing = hex_width * 0.75
-	var vertical_spacing = hex_height_2d
+	# Center-to-center spacing between hexes (odd-r offset layout):
+	# - Horizontal: full width
+	# - Vertical:   3/4 of height
+	var horizontal_spacing = hex_width
+	var vertical_spacing = hex_height_2d * 0.75
 	
 	# Adjust for gap
 	var adjusted_radius = hex_radius - gap_size
@@ -85,15 +95,14 @@ func generate_hex_grid():
 			var height = terrain_map[row][col]
 			var hex_color: Color
 			var y_offset = 0.0
+			var is_water = false
 			
 			if height < (1.0 - land_percentage):
-				# Deep water
-				hex_color = color_water
-				y_offset = -0.1
+				# Deep water - skip hexagon, show water plane instead
+				is_water = true
 			elif height < (1.0 - land_percentage + 0.05):
-				# Shallow water / coast
-				hex_color = color_water.lerp(color_sand, 0.5)
-				y_offset = -0.05
+				# Shallow water / coast - skip hexagon, show water plane
+				is_water = true
 			elif height < (1.0 - land_percentage + 0.15):
 				# Beach / sand
 				hex_color = color_sand
@@ -111,12 +120,14 @@ func generate_hex_grid():
 				hex_color = color_mountain
 				y_offset = 0.2
 			
-			# Create hexagon at this position
-			add_hexagon(vertices, normals, colors, indices, 
-						Vector3(center_x, y_offset, center_z), 
-						adjusted_radius, hex_color, vertex_offset)
-			
-			vertex_offset += 14  # 7 vertices top + 7 vertices bottom
+			# Only create hexagon for land tiles (skip water)
+			if not is_water:
+				# Create hexagon at this position
+				add_hexagon(vertices, normals, colors, indices, 
+							Vector3(center_x, y_offset, center_z), 
+							adjusted_radius, hex_color, vertex_offset)
+				
+				vertex_offset += 14  # 7 vertices top + 7 vertices bottom
 
 	# Assign arrays to mesh
 	arrays[Mesh.ARRAY_VERTEX] = vertices
@@ -141,8 +152,14 @@ func generate_hex_grid():
 	# Assign mesh to MeshInstance3D
 	mesh = array_mesh
 	
-	print("Generated hexagonal grid: %dx%d (%d hexagons, %d vertices)" % 
-		  [grid_width, grid_height, grid_width * grid_height, vertices.size()])
+	var hex_count = vertices.size() / 14  # 14 vertices per hexagon
+	print("Generated hexagonal grid: %dx%d (%d land hexagons, %d vertices)" % 
+		  [grid_width, grid_height, hex_count, vertices.size()])
+
+func _darken_color(base_color: Color, intensity: float) -> Color:
+	"""Darken a color by a given intensity (0 = no darkening, 1 = fully black)"""
+	var factor = clamp(1.0 - intensity, 0.0, 1.0)
+	return Color(base_color.r * factor, base_color.g * factor, base_color.b * factor, base_color.a)
 
 func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array, 
 				 colors: PackedColorArray, indices: PackedInt32Array,
@@ -170,25 +187,37 @@ func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array,
 	var center_top = Vector3(center.x, center.y + hex_height * 0.5, center.z)
 	vertices.append(center_top)
 	normals.append(Vector3(0, 1, 0))
+	# Keep the center close to the original color so tiles read clearly
 	colors.append(color)
 	
 	# Add outer vertices for top
 	for i in range(6):
 		vertices.append(hex_vertices_top[i])
 		normals.append(Vector3(0, 1, 0))
-		colors.append(color)
+		# Darken the rim slightly for a soft AO look
+		if ao_enabled and ao_edge_intensity > 0.0:
+			colors.append(_darken_color(color, ao_edge_intensity))
+		else:
+			colors.append(color)
 	
 	# Add center vertex for bottom
 	var center_bottom = Vector3(center.x, center.y - hex_height * 0.5, center.z)
 	vertices.append(center_bottom)
 	normals.append(Vector3(0, -1, 0))
-	colors.append(color)
+	# Underside is darker – suggests contact shadow against the water
+	if ao_enabled and ao_bottom_intensity > 0.0:
+		colors.append(_darken_color(color, ao_bottom_intensity))
+	else:
+		colors.append(color)
 	
 	# Add outer vertices for bottom
 	for i in range(6):
 		vertices.append(hex_vertices_bottom[i])
 		normals.append(Vector3(0, -1, 0))
-		colors.append(color)
+		if ao_enabled and ao_bottom_intensity > 0.0:
+			colors.append(_darken_color(color, ao_bottom_intensity))
+		else:
+			colors.append(color)
 	
 	# Create triangles for top surface
 	for i in range(6):
@@ -223,25 +252,25 @@ func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array,
 		indices.append(bottom2)
 
 func get_hex_at_world_position(world_pos: Vector3) -> Vector2i:
-	"""Convert world position to hex grid coordinates"""
-	var hex_width = hex_radius * 2.0
-	var hex_height_2d = sqrt(3.0) * hex_radius
-	var horizontal_spacing = hex_width * 0.75
-	var vertical_spacing = hex_height_2d
+	"""Convert world position to hex grid coordinates (approximate)"""
+	# Use the same layout math as in generate_hex_grid()
+	var hex_width = sqrt(3.0) * hex_radius
+	var hex_height_2d = 2.0 * hex_radius
+	var horizontal_spacing = hex_width
+	var vertical_spacing = hex_height_2d * 0.75
 	
-	# Adjust for centering
+	# Undo centering offset
 	var adjusted_x = world_pos.x + (grid_width * horizontal_spacing) * 0.5
 	var adjusted_z = world_pos.z + (grid_height * vertical_spacing) * 0.5
 	
 	# Approximate row
-	var row = int(adjusted_z / vertical_spacing)
+	var row = int(round(adjusted_z / vertical_spacing))
 	
-	# Calculate column with offset consideration
+	# Column depends on whether this is an offset row
 	var x_offset = 0.0
 	if row % 2 == 1:
-		x_offset = horizontal_spacing * 0.5
+		x_offset = hex_width * 0.5
 	
-	var col = int((adjusted_x - x_offset) / horizontal_spacing)
+	var col = int(round((adjusted_x - x_offset) / horizontal_spacing))
 	
 	return Vector2i(col, row)
-
