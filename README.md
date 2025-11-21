@@ -1,19 +1,22 @@
-# Dynamic Subdivided Plane - Godot Project
+# Hexagonal Grid Water World - Godot Project
 
-This project demonstrates how to create a dynamically generated subdivided plane mesh in Godot 4.5.
+This project demonstrates dynamic mesh generation in Godot 4.5, featuring a Civilization-style hexagonal tile grid on top of animated water.
 
 ## Features
 
-- **Dynamic mesh generation**: Creates a plane mesh programmatically with customizable subdivisions
-- **Adjustable parameters**: Control size and subdivision count via exported variables
-- **Runtime modification**: Change the plane's properties during gameplay
-- **Wave animation example**: Demonstrates real-time vertex manipulation
+- **Hexagonal Grid System**: Civilization-style hex tiles with customizable size, colors, and spacing
+- **Procedural Terrain Generation**: Realistic land/water maps using Perlin noise
+- **Multiple Terrain Types**: Water (deep/shallow), sand, grass, forest, and mountains
+- **Dynamic Water Plane**: Animated water with wave effects
+- **Elevation System**: Different hex heights based on terrain type
+- **Runtime Modification**: Adjust properties during gameplay with keyboard controls
 
 ## Files
 
-- `subdivided_plane.gd` - Core script that generates the subdivided plane mesh
-- `plane_controller.gd` - Example controller showing runtime manipulation
-- `node_3d.tscn` - Main scene with the plane, camera, and lighting
+- `hexagon_grid.gd` - Hexagonal grid mesh generator (Civilization-style)
+- `subdivided_plane.gd` - Water plane mesh generator with subdivision support
+- `plane_controller.gd` - Main controller for both water and hex grid
+- `node_3d.tscn` - Main scene with water, hex grid, camera, and lighting
 
 ## Usage
 
@@ -29,53 +32,115 @@ The `SubdividedPlane` node is a `MeshInstance3D` with the `subdivided_plane.gd` 
 
 When you run the scene, you can use these keyboard controls:
 
-- **[1]** - Decrease subdivisions by 5
-- **[2]** - Increase subdivisions by 5
-- **[3]** - Make plane 20% smaller
-- **[4]** - Make plane 25% larger
+**Water Plane:**
+- **[1]** - Decrease subdivisions
+- **[2]** - Increase subdivisions
+- **[3]** - Make plane smaller
+- **[4]** - Make plane larger
 - **[R]** - Regenerate plane
-- **[W]** - Toggle wave animation (demonstrates dynamic vertex manipulation)
+- **[W]** - Toggle wave animation
 
-### Using in Your Own Projects
+**Hexagon Grid:**
+- **[H]** - Toggle hexagon grid visibility
+- **[G]** - Generate new random terrain (new seed)
+- **[+]** - Increase hex grid size
+- **[-]** - Decrease hex grid size
+- **[Q]** - Increase hex radius (bigger tiles)
+- **[A]** - Decrease hex radius (smaller tiles)
+- **[L]** - More land (less ocean)
+- **[O]** - More ocean (less land)
+- **[N]** - Cycle noise scale (changes landmass size)
 
-1. Copy `subdivided_plane.gd` to your project
-2. Create a `MeshInstance3D` node in your scene
-3. Attach the `subdivided_plane.gd` script
-4. Adjust the exported properties in the Inspector
-5. Call `generate_plane()` to regenerate the mesh at runtime
+### Using the Hexagon Grid
+
+The `HexagonGrid` has these exported properties:
+
+**Grid Properties:**
+- **hex_radius**: Size of each hexagon
+- **grid_width**: Number of hexagons horizontally
+- **grid_height**: Number of hexagons vertically
+- **hex_height**: Thickness of hex tiles
+- **gap_size**: Space between hexagons
+
+**Terrain Generation:**
+- **land_percentage**: How much of the map is land vs water (0.0 to 1.0)
+- **noise_scale**: Size of landmasses (lower = bigger continents)
+- **noise_seed**: Random seed for generation (0 = random each time)
+
+**Colors:**
+- **color_water**: Deep water color
+- **color_sand**: Beach/sand color
+- **color_grass**: Grassland color
+- **color_forest**: Forest color
+- **color_mountain**: Mountain/high elevation color
 
 Example code:
 
 ```gdscript
-@onready var plane = $SubdividedPlane
+@onready var hex_grid = $HexagonGrid
 
 func _ready():
-    # Change properties
-    plane.size = Vector2(20, 20)
-    plane.subdivisions = Vector2i(50, 50)
+    # Customize the grid
+    hex_grid.hex_radius = 0.5
+    hex_grid.grid_width = 20
+    hex_grid.grid_height = 20
+    hex_grid.gap_size = 0.05
     
-    # Regenerate mesh
-    plane.generate_plane()
+    # Adjust terrain generation
+    hex_grid.land_percentage = 0.5  # 50% land
+    hex_grid.noise_scale = 0.1  # Large continents
+    hex_grid.noise_seed = 12345  # Fixed seed for reproducible maps
+    
+    # Regenerate with new settings
+    hex_grid.generate_hex_grid()
+    
+    # Convert world position to hex coordinates
+    var hex_coords = hex_grid.get_hex_at_world_position(Vector3(1.0, 0, 1.0))
+    print("Hex at position: ", hex_coords)
 ```
 
 ## Technical Details
 
-The script creates a mesh using Godot's `ArrayMesh` system:
+### Hexagon Grid System
 
-- Generates vertices in a grid pattern
-- Creates UV coordinates for texture mapping
-- Generates normals (pointing upward by default)
-- Creates triangle indices for the mesh faces
-- Each quad is made of two triangles
+The hexagonal grid uses **flat-top orientation** (like Civilization games):
 
-The mesh is centered at the origin (0, 0, 0) and extends equally in positive and negative X and Z directions.
+- Each hexagon has 6 vertices arranged at 60° intervals (starting at 30°)
+- Odd rows are offset horizontally by half-width to create interlocking pattern
+- Hexagons have thickness (top + bottom + side faces)
+- Uses vertex colors for terrain variety
+- Elevation varies by terrain type for visual depth
+- Grid coordinates can be converted from world position
+
+**Procedural Terrain Generation:**
+- Uses FastNoiseLite (Perlin noise) for natural-looking landmasses
+- Terrain types assigned based on noise height values
+- Water tiles positioned lower, mountains higher for realistic elevation
+- Smooth transitions between biomes (shallow water, beaches, etc.)
+
+### Water Plane
+
+Creates a subdivided plane mesh using Godot's `ArrayMesh`:
+
+- Grid-based vertex generation
+- UV coordinates for texture mapping
+- Upward-pointing normals
+- Triangle indices (2 triangles per quad)
+- Centered at origin
 
 ## Performance Notes
 
-- Higher subdivision counts create more vertices and triangles
-- For 20x20 subdivisions: 441 vertices and 800 triangles
-- The wave animation regenerates the entire mesh each frame (for demonstration purposes)
-- For production use, consider using a shader for animations instead of CPU-based vertex manipulation
+**Hexagon Grid:**
+- 12x12 grid = 144 hexagons with ~2,000 vertices
+- All hexagons are in a single mesh for optimal rendering
+- Regenerating the mesh is fast enough for gameplay adjustments
+- For clicking individual hexagons, implement raycasting
+
+**Water Plane:**
+- Higher subdivisions = more vertices and triangles
+- 20x20 subdivisions = 441 vertices and 800 triangles
+- Wave animation regenerates mesh each frame (demonstration only)
+- For production, use a shader for water animation instead
 
 ## License
 

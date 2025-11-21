@@ -1,31 +1,69 @@
-[gd_scene load_steps=5 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=9 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://dgfthppy3x5tv" path="res://subdivided_plane.gd" id="1_3djyb"]
 [ext_resource type="Script" uid="uid://dci8lfo4sk8xp" path="res://plane_controller.gd" id="2_mh8ky"]
+[ext_resource type="Script" uid="uid://cjm3h5x8qw7yk" path="res://hexagon_grid.gd" id="3_hexgrid"]
+
+[sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_hqk3q"]
+ground_color = Color(0.15, 0.2, 0.25, 1)
+
+[sub_resource type="Sky" id="Sky_bklfy"]
+sky_material = SubResource("PhysicalSkyMaterial_hqk3q")
+
+[sub_resource type="Environment" id="Environment_tippv"]
+background_mode = 2
+sky = SubResource("Sky_bklfy")
+ambient_light_source = 2
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g8wqy"]
-albedo_color = Color(0.2, 0.6, 0.8, 1)
-metallic = 0.2
-roughness = 0.8
+transparency = 1
+albedo_color = Color(0.06, 0.35, 0.5, 0.85)
+metallic = 0.05
+roughness = 0.05
+clearcoat_roughness = 0.03
 
 [sub_resource type="BoxMesh" id="BoxMesh_noarx"]
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("2_mh8ky")
 
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_tippv")
+
 [node name="SubdividedPlane" type="MeshInstance3D" parent="."]
 material_override = SubResource("StandardMaterial3D_g8wqy")
 script = ExtResource("1_3djyb")
-subdivisions = Vector2i(20, 20)
+size = Vector2(20, 20)
+subdivisions = Vector2i(30, 30)
+
+[node name="HexagonGrid" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.3, 0)
+script = ExtResource("3_hexgrid")
+hex_radius = 0.45
+grid_width = 16
+grid_height = 16
+hex_height = 0.08
+gap_size = 0.03
+land_percentage = 0.45
+noise_scale = 0.12
+
+[node name="ReflectionProbe" type="ReflectionProbe" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+update_mode = 1
+intensity = 1.1
+size = Vector3(30, 20, 30)
+box_projection = true
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 12, 18)
+transform = Transform3D(1, 0, 0, 0, 0.8038565, 0.5948226, 0, -0.5948226, 0.8038565, 0.96, 12, 18)
 current = true
 fov = 70.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)
+light_energy = 1.912
 shadow_enabled = true
 
 [node name="MyCube" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
 mesh = SubResource("BoxMesh_noarx")

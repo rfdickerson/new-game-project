@@ -1,0 +1,247 @@
+extends MeshInstance3D
+
+## Hexagonal grid mesh generator (Civilization-style)
+@export var hex_radius: float = 0.5  ## Radius of each hexagon
+@export var grid_width: int = 10  ## Number of hexagons in width
+@export var grid_height: int = 10  ## Number of hexagons in height
+@export var hex_height: float = 0.05  ## Height/thickness of hexagon tiles
+@export var gap_size: float = 0.02  ## Gap between hexagons
+@export var auto_generate: bool = true
+
+## Colors for different terrain types
+@export var color_water: Color = Color(0.2, 0.4, 0.8, 0.7)
+@export var color_grass: Color = Color(0.3, 0.7, 0.3, 0.9)
+@export var color_sand: Color = Color(0.9, 0.8, 0.5, 0.9)
+@export var color_forest: Color = Color(0.15, 0.5, 0.2, 0.9)
+@export var color_mountain: Color = Color(0.5, 0.5, 0.5, 0.9)
+
+## Terrain generation settings
+@export var land_percentage: float = 0.4  ## Percentage of map that should be land (0.0 to 1.0)
+@export var noise_scale: float = 0.15  ## Scale of terrain noise (lower = larger land masses)
+@export var noise_seed: int = 0  ## Seed for random generation (0 = random)
+
+func _ready():
+	if auto_generate:
+		generate_hex_grid()
+
+func generate_hex_grid():
+	"""Generate a hexagonal grid mesh"""
+	var arrays = []
+	arrays.resize(Mesh.ARRAY_MAX)
+	
+	var vertices = PackedVector3Array()
+	var normals = PackedVector3Array()
+	var colors = PackedColorArray()
+	var indices = PackedInt32Array()
+	
+	var vertex_offset = 0
+	
+	# Hexagon dimensions (flat-top orientation like Civilization)
+	var hex_width = hex_radius * 2.0
+	var hex_height_2d = sqrt(3.0) * hex_radius
+	
+	# Spacing between hexagons
+	var horizontal_spacing = hex_width * 0.75
+	var vertical_spacing = hex_height_2d
+	
+	# Adjust for gap
+	var adjusted_radius = hex_radius - gap_size
+	
+	# Setup noise for procedural terrain generation
+	var noise = FastNoiseLite.new()
+	if noise_seed == 0:
+		noise.seed = randi()
+	else:
+		noise.seed = noise_seed
+	noise.noise_type = FastNoiseLite.TYPE_PERLIN
+	noise.frequency = noise_scale
+	
+	# Generate terrain height map
+	var terrain_map = []
+	for row in range(grid_height):
+		terrain_map.append([])
+		for col in range(grid_width):
+			var noise_value = noise.get_noise_2d(float(col), float(row))
+			# Normalize from [-1, 1] to [0, 1]
+			var height_value = (noise_value + 1.0) * 0.5
+			terrain_map[row].append(height_value)
+	
+	# Generate each hexagon in the grid
+	for row in range(grid_height):
+		for col in range(grid_width):
+			# Calculate hexagon center position
+			var x_offset = 0.0
+			if row % 2 == 1:  # Offset odd rows for hexagonal pattern
+				x_offset = horizontal_spacing * 0.5
+			
+			var center_x = col * horizontal_spacing + x_offset
+			var center_z = row * vertical_spacing
+			
+			# Center the entire grid
+			center_x -= (grid_width * horizontal_spacing) * 0.5
+			center_z -= (grid_height * vertical_spacing) * 0.5
+			
+			# Get terrain type based on noise value
+			var height = terrain_map[row][col]
+			var hex_color: Color
+			var y_offset = 0.0
+			
+			if height < (1.0 - land_percentage):
+				# Deep water
+				hex_color = color_water
+				y_offset = -0.1
+			elif height < (1.0 - land_percentage + 0.05):
+				# Shallow water / coast
+				hex_color = color_water.lerp(color_sand, 0.5)
+				y_offset = -0.05
+			elif height < (1.0 - land_percentage + 0.15):
+				# Beach / sand
+				hex_color = color_sand
+				y_offset = 0.0
+			elif height < (1.0 - land_percentage + 0.5):
+				# Grassland
+				hex_color = color_grass
+				y_offset = 0.05
+			elif height < (1.0 - land_percentage + 0.7):
+				# Forest
+				hex_color = color_forest
+				y_offset = 0.1
+			else:
+				# Mountains
+				hex_color = color_mountain
+				y_offset = 0.2
+			
+			# Create hexagon at this position
+			add_hexagon(vertices, normals, colors, indices, 
+						Vector3(center_x, y_offset, center_z), 
+						adjusted_radius, hex_color, vertex_offset)
+			
+			vertex_offset += 14  # 7 vertices top + 7 vertices bottom
+
+	# Assign arrays to mesh
+	arrays[Mesh.ARRAY_VERTEX] = vertices
+	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_COLOR] = colors
+	arrays[Mesh.ARRAY_INDEX] = indices
+	
+	# Create the mesh
+	var array_mesh = ArrayMesh.new()
+	array_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	
+	# Create material
+	var material = StandardMaterial3D.new()
+	material.vertex_color_use_as_albedo = true
+	material.transparency = 1  # Use alpha from vertex colors
+	material.metallic = 0.1
+	material.roughness = 0.7
+	material.cull_mode = BaseMaterial3D.CULL_DISABLED  # Show both sides
+	
+	array_mesh.surface_set_material(0, material)
+	
+	# Assign mesh to MeshInstance3D
+	mesh = array_mesh
+	
+	print("Generated hexagonal grid: %dx%d (%d hexagons, %d vertices)" % 
+		  [grid_width, grid_height, grid_width * grid_height, vertices.size()])
+
+func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array, 
+				 colors: PackedColorArray, indices: PackedInt32Array,
+				 center: Vector3, radius: float, color: Color, vertex_offset: int):
+	"""Add a single hexagon to the mesh arrays"""
+	
+	# Generate 6 vertices around the hexagon (flat-top orientation)
+	var hex_vertices_top = []
+	var hex_vertices_bottom = []
+	
+	for i in range(6):
+		# For flat-top hexagons, start at 30° and increment by 60°
+		var angle_deg = 30.0 + (60.0 * i)
+		var angle_rad = deg_to_rad(angle_deg)
+		
+		var x = center.x + radius * cos(angle_rad)
+		var z = center.z + radius * sin(angle_rad)
+		
+		# Top surface
+		hex_vertices_top.append(Vector3(x, center.y + hex_height * 0.5, z))
+		# Bottom surface
+		hex_vertices_bottom.append(Vector3(x, center.y - hex_height * 0.5, z))
+	
+	# Add center vertex for top
+	var center_top = Vector3(center.x, center.y + hex_height * 0.5, center.z)
+	vertices.append(center_top)
+	normals.append(Vector3(0, 1, 0))
+	colors.append(color)
+	
+	# Add outer vertices for top
+	for i in range(6):
+		vertices.append(hex_vertices_top[i])
+		normals.append(Vector3(0, 1, 0))
+		colors.append(color)
+	
+	# Add center vertex for bottom
+	var center_bottom = Vector3(center.x, center.y - hex_height * 0.5, center.z)
+	vertices.append(center_bottom)
+	normals.append(Vector3(0, -1, 0))
+	colors.append(color)
+	
+	# Add outer vertices for bottom
+	for i in range(6):
+		vertices.append(hex_vertices_bottom[i])
+		normals.append(Vector3(0, -1, 0))
+		colors.append(color)
+	
+	# Create triangles for top surface
+	for i in range(6):
+		var next_i = (i + 1) % 6
+		indices.append(vertex_offset)  # Center
+		indices.append(vertex_offset + i + 1)
+		indices.append(vertex_offset + next_i + 1)
+	
+	# Create triangles for bottom surface (reversed winding)
+	for i in range(6):
+		var next_i = (i + 1) % 6
+		indices.append(vertex_offset + 7)  # Center bottom
+		indices.append(vertex_offset + 7 + next_i + 1)
+		indices.append(vertex_offset + 7 + i + 1)
+	
+	# Create side faces
+	for i in range(6):
+		var next_i = (i + 1) % 6
+		var top1 = vertex_offset + i + 1
+		var top2 = vertex_offset + next_i + 1
+		var bottom1 = vertex_offset + 7 + i + 1
+		var bottom2 = vertex_offset + 7 + next_i + 1
+		
+		# First triangle
+		indices.append(top1)
+		indices.append(bottom1)
+		indices.append(top2)
+		
+		# Second triangle
+		indices.append(top2)
+		indices.append(bottom1)
+		indices.append(bottom2)
+
+func get_hex_at_world_position(world_pos: Vector3) -> Vector2i:
+	"""Convert world position to hex grid coordinates"""
+	var hex_width = hex_radius * 2.0
+	var hex_height_2d = sqrt(3.0) * hex_radius
+	var horizontal_spacing = hex_width * 0.75
+	var vertical_spacing = hex_height_2d
+	
+	# Adjust for centering
+	var adjusted_x = world_pos.x + (grid_width * horizontal_spacing) * 0.5
+	var adjusted_z = world_pos.z + (grid_height * vertical_spacing) * 0.5
+	
+	# Approximate row
+	var row = int(adjusted_z / vertical_spacing)
+	
+	# Calculate column with offset consideration
+	var x_offset = 0.0
+	if row % 2 == 1:
+		x_offset = horizontal_spacing * 0.5
+	
+	var col = int((adjusted_x - x_offset) / horizontal_spacing)
+	
+	return Vector2i(col, row)
+

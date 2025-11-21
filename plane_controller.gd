@@ -3,15 +3,28 @@ extends Node3D
 ## Example controller to demonstrate dynamic plane manipulation
 
 @onready var plane = $SubdividedPlane
+@onready var hex_grid = $HexagonGrid
 
 func _ready():
-	print("Press keys to modify the plane:")
+	print("=== CONTROLS ===")
+	print("Water Plane:")
 	print("  [1] - Decrease subdivisions")
 	print("  [2] - Increase subdivisions")
 	print("  [3] - Make plane smaller")
 	print("  [4] - Make plane larger")
 	print("  [R] - Regenerate plane")
 	print("  [W] - Animate with waves")
+	print("")
+	print("Hexagon Grid:")
+	print("  [H] - Toggle hexagon grid visibility")
+	print("  [G] - Regenerate terrain (new random seed)")
+	print("  [+] - Increase hex grid size")
+	print("  [-] - Decrease hex grid size")
+	print("  [Q] - Increase hex radius")
+	print("  [A] - Decrease hex radius")
+	print("  [L] - More land")
+	print("  [O] - More ocean")
+	print("  [N] - Adjust noise scale (terrain size)")
 
 var wave_enabled = false
 var time_elapsed = 0.0
@@ -62,6 +75,55 @@ func _input(event):
 				else:
 					print("Wave animation disabled - regenerating flat plane")
 					plane.generate_plane()
+			
+			# Hexagon grid controls
+			KEY_H:
+				hex_grid.visible = !hex_grid.visible
+				print("Hexagon grid visibility: ", hex_grid.visible)
+			
+			KEY_G:
+				hex_grid.noise_seed = 0  # Random seed
+				hex_grid.generate_hex_grid()
+				print("New terrain generated!")
+			
+			KEY_EQUAL, KEY_KP_ADD:  # + key
+				hex_grid.grid_width += 2
+				hex_grid.grid_height += 2
+				hex_grid.generate_hex_grid()
+				print("Grid size: %dx%d" % [hex_grid.grid_width, hex_grid.grid_height])
+			
+			KEY_MINUS, KEY_KP_SUBTRACT:  # - key
+				hex_grid.grid_width = max(2, hex_grid.grid_width - 2)
+				hex_grid.grid_height = max(2, hex_grid.grid_height - 2)
+				hex_grid.generate_hex_grid()
+				print("Grid size: %dx%d" % [hex_grid.grid_width, hex_grid.grid_height])
+			
+			KEY_Q:
+				hex_grid.hex_radius += 0.05
+				hex_grid.generate_hex_grid()
+				print("Hex radius: %.2f" % hex_grid.hex_radius)
+			
+			KEY_A:
+				hex_grid.hex_radius = max(0.1, hex_grid.hex_radius - 0.05)
+				hex_grid.generate_hex_grid()
+				print("Hex radius: %.2f" % hex_grid.hex_radius)
+			
+			KEY_L:
+				hex_grid.land_percentage = min(0.9, hex_grid.land_percentage + 0.1)
+				hex_grid.generate_hex_grid()
+				print("Land percentage: %.1f%%" % (hex_grid.land_percentage * 100))
+			
+			KEY_O:
+				hex_grid.land_percentage = max(0.1, hex_grid.land_percentage - 0.1)
+				hex_grid.generate_hex_grid()
+				print("Land percentage: %.1f%%" % (hex_grid.land_percentage * 100))
+			
+			KEY_N:
+				hex_grid.noise_scale += 0.05
+				if hex_grid.noise_scale > 0.5:
+					hex_grid.noise_scale = 0.05
+				hex_grid.generate_hex_grid()
+				print("Noise scale: %.2f (lower = larger landmasses)" % hex_grid.noise_scale)
 
 func animate_waves():
 	"""Example of animating the plane vertices with a wave effect"""
