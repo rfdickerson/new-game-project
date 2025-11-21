@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3 uid="uid://mgp02mkor0at"]
+
+[ext_resource type="Script" uid="uid://dgfthppy3x5tv" path="res://subdivided_plane.gd" id="1_3djyb"]
+[ext_resource type="Script" uid="uid://dci8lfo4sk8xp" path="res://plane_controller.gd" id="2_mh8ky"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g8wqy"]
+albedo_color = Color(0.2, 0.6, 0.8, 1)
+metallic = 0.2
+roughness = 0.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_noarx"]
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("2_mh8ky")
+
+[node name="SubdividedPlane" type="MeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_g8wqy")
+script = ExtResource("1_3djyb")
+subdivisions = Vector2i(20, 20)
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0, 12, 18)
+current = true
+fov = 70.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)
+shadow_enabled = true
+
+[node name="MyCube" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_noarx")
