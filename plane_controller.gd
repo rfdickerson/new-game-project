@@ -7,6 +7,7 @@ const WATER_ANIMATED_SHADER := preload("res://water_animated.gdshader")
 
 @onready var plane = $SubdividedPlane
 @onready var hex_grid = $HexagonGrid
+@onready var game_ui = $UILayer/GameUI
 
 func _ready():
 	_apply_water_shader()
@@ -29,6 +30,7 @@ func _ready():
 	print("  [L] - More land")
 	print("  [P] - More ocean")
 	print("  [N] - Adjust noise scale (terrain size)")
+	print("  [Enter] - Next Turn")
 
 var wave_enabled = false
 var time_elapsed = 0.0
@@ -128,6 +130,11 @@ func _input(event):
 					hex_grid.noise_scale = 0.05
 				hex_grid.generate_hex_grid()
 				print("Noise scale: %.2f (lower = larger landmasses)" % hex_grid.noise_scale)
+			
+			KEY_ENTER:
+				if game_ui:
+					game_ui.next_turn()
+					print("Turn ended. New Year: ", game_ui.year)
 
 func _get_sky_color() -> Color:
 	var env = get_world_3d().environment

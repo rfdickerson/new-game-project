@@ -6,7 +6,8 @@
 [ext_resource type="Script" uid="uid://c1vewl8x26427" path="res://strategy_camera.gd" id="4_camera"]
 [ext_resource type="Texture2D" uid="uid://du823vv3j5ami" path="res://textures/grass.png" id="4_jka67"]
 [ext_resource type="Shader" uid="uid://crm628pnootga" path="res://vignette_postprocess.gdshader" id="5_vignette_shader"]
-[ext_resource type="Texture2D" path="res://textures/sunny_rose_garden_1k.exr" id="6_skybox"]
+[ext_resource type="Texture2D" uid="uid://1vrxwvixh7au" path="res://textures/sunny_rose_garden_1k.exr" id="6_skybox"]
+[ext_resource type="Script" path="res://game_ui.gd" id="7_game_ui"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_skybox"]
 panorama = ExtResource("6_skybox")
@@ -19,7 +20,6 @@ radiance_size = 4
 background_mode = 2
 sky = SubResource("Sky_bklfy")
 ambient_light_source = 1
-ambient_light_energy = 1.0
 tonemap_mode = 2
 tonemap_white = 1.5
 fog_enabled = true
@@ -74,7 +74,7 @@ hex_height = 0.25
 gap_size = 0.0
 color_water = Color(0.05882353, 0.2784314, 0.3882353, 0.8784314)
 grass_texture = ExtResource("4_jka67")
-grass_texture_scale = 0.16
+grass_texture_scale = 0.5
 land_percentage = 0.465
 noise_scale = 0.12
 
@@ -110,3 +110,46 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
+
+[node name="UILayer" type="CanvasLayer" parent="."]
+
+[node name="GameUI" type="Control" parent="UILayer"]
+layout_mode = 3
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 50.0
+grow_horizontal = 2
+script = ExtResource("7_game_ui")
+
+[node name="Panel" type="Panel" parent="UILayer/GameUI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UILayer/GameUI"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 50
+alignment = 1
+
+[node name="GoldLabel" type="Label" parent="UILayer/GameUI/HBoxContainer"]
+layout_mode = 2
+text = "Gold: 0"
+vertical_alignment = 1
+
+[node name="YearLabel" type="Label" parent="UILayer/GameUI/HBoxContainer"]
+layout_mode = 2
+text = "Year: 0"
+vertical_alignment = 1
+
+[node name="TurnLabel" type="Label" parent="UILayer/GameUI/HBoxContainer"]
+layout_mode = 2
+text = "Turn: 1"
+vertical_alignment = 1
