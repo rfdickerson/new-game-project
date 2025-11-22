@@ -8,6 +8,7 @@
 [ext_resource type="Shader" uid="uid://crm628pnootga" path="res://vignette_postprocess.gdshader" id="5_vignette_shader"]
 [ext_resource type="Texture2D" uid="uid://1vrxwvixh7au" path="res://textures/sunny_rose_garden_1k.exr" id="6_skybox"]
 [ext_resource type="Script" path="res://game_ui.gd" id="7_game_ui"]
+[ext_resource type="FontFile" path="res://EBGaramond-VariableFont_wght.ttf" id="8_garamond"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_skybox"]
 panorama = ExtResource("6_skybox")
@@ -43,6 +44,10 @@ shader_parameter/vignette_intensity = 1.0
 shader_parameter/vignette_center = Vector2(0.5, 0.5)
 shader_parameter/vignette_radius = 0.75
 shader_parameter/vignette_smoothness = 0.4
+
+[sub_resource type="Theme" id="Theme_garamond"]
+default_font = ExtResource("8_garamond")
+default_font_size = 24
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("2_mh8ky")
@@ -119,6 +124,7 @@ anchors_preset = 10
 anchor_right = 1.0
 offset_bottom = 50.0
 grow_horizontal = 2
+theme = SubResource("Theme_garamond")
 script = ExtResource("7_game_ui")
 
 [node name="Panel" type="Panel" parent="UILayer/GameUI"]
