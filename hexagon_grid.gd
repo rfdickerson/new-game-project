@@ -20,6 +20,11 @@ extends MeshInstance3D
 @export var color_forest: Color = Color(0.2, 0.55, 0.25, 1.0)  # Deeper green
 @export var color_mountain: Color = Color(0.6, 0.6, 0.65, 1.0)  # Slightly lighter for visibility
 
+## Textures
+## Note: Use a format Godot can import as a texture (e.g. PNG, JPG, WEBP). AVIF is not supported by default.
+@export var grass_texture: Texture2D
+@export var grass_texture_scale: float = 2.0  ## How many times the grass texture repeats across a single hex
+
 ## Terrain generation settings
 @export var land_percentage: float = 0.4  ## Percentage of map that should be land (0.0 to 1.0)
 @export var noise_scale: float = 0.15  ## Scale of terrain noise (lower = larger land masses)
@@ -36,6 +41,7 @@ func generate_hex_grid():
 	
 	var vertices = PackedVector3Array()
 	var normals = PackedVector3Array()
+	var uvs = PackedVector2Array()
 	var colors = PackedColorArray()
 	var indices = PackedInt32Array()
 	
@@ -123,15 +129,16 @@ func generate_hex_grid():
 			# Only create hexagon for land tiles (skip water)
 			if not is_water:
 				# Create hexagon at this position
-				add_hexagon(vertices, normals, colors, indices, 
-							Vector3(center_x, y_offset, center_z), 
-							adjusted_radius, hex_color, vertex_offset)
+				add_hexagon(vertices, normals, uvs, colors, indices,
+						Vector3(center_x, y_offset, center_z),
+						adjusted_radius, hex_color, vertex_offset)
 				
 				vertex_offset += 14  # 7 vertices top + 7 vertices bottom
 
 	# Assign arrays to mesh
 	arrays[Mesh.ARRAY_VERTEX] = vertices
 	arrays[Mesh.ARRAY_NORMAL] = normals
+	arrays[Mesh.ARRAY_TEX_UV] = uvs
 	arrays[Mesh.ARRAY_COLOR] = colors
 	arrays[Mesh.ARRAY_INDEX] = indices
 	
@@ -147,6 +154,11 @@ func generate_hex_grid():
 	material.roughness = 0.85  # More matte, less shiny for better readability
 	material.cull_mode = BaseMaterial3D.CULL_BACK  # Standard back-face culling
 	material.albedo_color = Color(1.0, 1.0, 1.0, 1.0)  # White base for vertex colors to show through
+	
+	# Apply grass texture (shared across land tiles; grass hexes will tint it via vertex color)
+	if grass_texture:
+		material.albedo_texture = grass_texture
+		material.uv1_scale = Vector3(grass_texture_scale, grass_texture_scale, 1.0)
 	# Note: specular is controlled via metallic and roughness in Godot 4
 	
 	array_mesh.surface_set_material(0, material)
@@ -163,9 +175,17 @@ func _darken_color(base_color: Color, intensity: float) -> Color:
 	var factor = clamp(1.0 - intensity, 0.0, 1.0)
 	return Color(base_color.r * factor, base_color.g * factor, base_color.b * factor, base_color.a)
 
-func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array, 
-				 colors: PackedColorArray, indices: PackedInt32Array,
-				 center: Vector3, radius: float, color: Color, vertex_offset: int):
+func _get_uv_for_point(point: Vector3, center: Vector3, radius: float) -> Vector2:
+	"""Simple planar UV mapping based on X/Z around the hex center."""
+	var local_x = point.x - center.x
+	var local_z = point.z - center.z
+	var u = (local_x / (radius * 2.0)) + 0.5
+	var v = (local_z / (radius * 2.0)) + 0.5
+	return Vector2(u, v)
+
+func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array,
+		uvs: PackedVector2Array, colors: PackedColorArray, indices: PackedInt32Array,
+		center: Vector3, radius: float, color: Color, vertex_offset: int):
 	"""Add a single solid hexagon (top cap, bottom cap, and sides) to the mesh arrays."""
 	
 	# Generate 6 vertices around the hexagon (flat-top orientation)
@@ -190,12 +210,15 @@ func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array,
 	var center_top = Vector3(center.x, center.y + hex_height * 0.5, center.z)
 	vertices.append(center_top)
 	normals.append(Vector3(0, 1, 0))
+	uvs.append(Vector2(0.5, 0.5))
 	colors.append(color)
 	
 	# Outer ring vertices for top
 	for i in range(6):
-		vertices.append(hex_vertices_top[i])
+		var v_top = hex_vertices_top[i]
+		vertices.append(v_top)
 		normals.append(Vector3(0, 1, 0))
+		uvs.append(_get_uv_for_point(v_top, center, radius))
 		if ao_enabled and ao_edge_intensity > 0.0:
 			colors.append(_darken_color(color, ao_edge_intensity))
 		else:
@@ -206,6 +229,7 @@ func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array,
 	var center_bottom = Vector3(center.x, center.y - hex_height * 0.5, center.z)
 	vertices.append(center_bottom)
 	normals.append(Vector3(0, -1, 0))
+	uvs.append(Vector2(0.5, 0.5))
 	if ao_enabled and ao_bottom_intensity > 0.0:
 		colors.append(_darken_color(color, ao_bottom_intensity))
 	else:
@@ -213,8 +237,10 @@ func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array,
 	
 	# Outer ring vertices for bottom
 	for i in range(6):
-		vertices.append(hex_vertices_bottom[i])
+		var v_bottom = hex_vertices_bottom[i]
+		vertices.append(v_bottom)
 		normals.append(Vector3(0, -1, 0))
+		uvs.append(_get_uv_for_point(v_bottom, center, radius))
 		if ao_enabled and ao_bottom_intensity > 0.0:
 			colors.append(_darken_color(color, ao_bottom_intensity))
 		else:
