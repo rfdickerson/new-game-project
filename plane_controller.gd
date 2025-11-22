@@ -3,6 +3,7 @@ extends Node3D
 ## Example controller to demonstrate dynamic plane manipulation
 
 const WATER_SHADER := preload("res://water_reflection.gdshader")
+const WATER_ANIMATED_SHADER := preload("res://water_animated.gdshader")
 
 @onready var plane = $SubdividedPlane
 @onready var hex_grid = $HexagonGrid
@@ -136,19 +137,29 @@ func _get_sky_color() -> Color:
 
 func _apply_water_shader():
 	var shader_material = ShaderMaterial.new()
-	shader_material.shader = WATER_SHADER
+	shader_material.shader = WATER_ANIMATED_SHADER
 
-	var base_color_vec = Vector3(0.06, 0.35, 0.5)
-	if plane.material_override is StandardMaterial3D:
-		var existing = plane.material_override as StandardMaterial3D
-		base_color_vec = Vector3(existing.albedo_color.r, existing.albedo_color.g, existing.albedo_color.b)
-
-	shader_material.set_shader_parameter("base_color", base_color_vec)
 	var sky_color = _get_sky_color()
+	
+	# Set water colors for depth-based rendering
+	shader_material.set_shader_parameter("shallow_color", Vector3(0.2, 0.6, 0.8))
+	shader_material.set_shader_parameter("deep_color", Vector3(0.05, 0.2, 0.4))
 	shader_material.set_shader_parameter("sky_color", Vector3(sky_color.r, sky_color.g, sky_color.b))
-	shader_material.set_shader_parameter("alpha", 0.85)
-	shader_material.set_shader_parameter("reflection_strength", 0.3)  # Reduced for more subtle reflection
-	shader_material.set_shader_parameter("fresnel_power", 2.4)
+	
+	# Wave parameters
+	shader_material.set_shader_parameter("wave_speed", 1.2)
+	shader_material.set_shader_parameter("wave_amplitude", 0.25)
+	shader_material.set_shader_parameter("wave_frequency", 2.5)
+	shader_material.set_shader_parameter("wave_scale", 0.4)
+	
+	# Reflection and appearance
+	shader_material.set_shader_parameter("reflection_strength", 0.4)
+	shader_material.set_shader_parameter("fresnel_power", 2.0)
+	shader_material.set_shader_parameter("alpha", 0.9)
+	
+	# Foam
+	shader_material.set_shader_parameter("foam_threshold", 0.75)
+	shader_material.set_shader_parameter("foam_intensity", 0.25)
 
 	plane.material_override = shader_material
 	plane.generate_plane()

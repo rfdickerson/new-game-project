@@ -13,12 +13,12 @@ extends MeshInstance3D
 @export var ao_edge_intensity: float = 0.3  ## How dark the outer rim of the top face becomes (0–1)
 @export var ao_bottom_intensity: float = 0.6  ## How dark the underside becomes (0–1)
 
-## Colors for different terrain types
+## Colors for different terrain types (enhanced for strategy game)
 @export var color_water: Color = Color(0.2, 0.4, 0.8, 0.7)
-@export var color_grass: Color = Color(0.3, 0.7, 0.3, 0.9)
-@export var color_sand: Color = Color(0.9, 0.8, 0.5, 0.9)
-@export var color_forest: Color = Color(0.15, 0.5, 0.2, 0.9)
-@export var color_mountain: Color = Color(0.5, 0.5, 0.5, 0.9)
+@export var color_grass: Color = Color(0.4, 0.75, 0.35, 1.0)  # Brighter, more vibrant
+@export var color_sand: Color = Color(0.95, 0.85, 0.6, 1.0)  # Warmer sand
+@export var color_forest: Color = Color(0.2, 0.55, 0.25, 1.0)  # Deeper green
+@export var color_mountain: Color = Color(0.6, 0.6, 0.65, 1.0)  # Slightly lighter for visibility
 
 ## Terrain generation settings
 @export var land_percentage: float = 0.4  ## Percentage of map that should be land (0.0 to 1.0)
@@ -139,13 +139,15 @@ func generate_hex_grid():
 	var array_mesh = ArrayMesh.new()
 	array_mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 	
-	# Create material
+	# Create material with better properties for strategy game
 	var material = StandardMaterial3D.new()
 	material.vertex_color_use_as_albedo = true
 	material.transparency = 1  # Use alpha from vertex colors
-	material.metallic = 0.1
-	material.roughness = 0.7
+	material.metallic = 0.05
+	material.roughness = 0.85  # More matte, less shiny for better readability
 	material.cull_mode = BaseMaterial3D.CULL_DISABLED  # Show both sides
+	material.albedo_color = Color(1.0, 1.0, 1.0, 1.0)  # White base for vertex colors to show through
+	# Note: specular is controlled via metallic and roughness in Godot 4
 	
 	array_mesh.surface_set_material(0, material)
 	
