@@ -1,16 +1,17 @@
-[gd_scene load_steps=28 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=29 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://dgfthppy3x5tv" path="res://subdivided_plane.gd" id="1_3djyb"]
 [ext_resource type="Script" uid="uid://dci8lfo4sk8xp" path="res://plane_controller.gd" id="2_mh8ky"]
 [ext_resource type="Script" uid="uid://cjm3h5x8qw7yk" path="res://hexagon_grid.gd" id="3_hexgrid"]
 [ext_resource type="Script" uid="uid://c1vewl8x26427" path="res://strategy_camera.gd" id="4_camera"]
+[ext_resource type="Texture2D" uid="uid://dnmes0xkmkswv" path="res://textures/grass2.jpg" id="5_3v7ru"]
 [ext_resource type="Shader" uid="uid://crm628pnootga" path="res://vignette_postprocess.gdshader" id="5_vignette_shader"]
 [ext_resource type="Texture2D" uid="uid://1vrxwvixh7au" path="res://textures/sunny_rose_garden_1k.exr" id="6_skybox"]
 [ext_resource type="Script" uid="uid://c74v0h4beaiwg" path="res://game_ui.gd" id="7_game_ui"]
 [ext_resource type="FontFile" uid="uid://baubrtgwtnyh3" path="res://EBGaramond-VariableFont_wght.ttf" id="8_garamond"]
 [ext_resource type="Texture2D" uid="uid://e66hnxd2q2fy" path="res://textures/gold2.png" id="9_6iypd"]
 [ext_resource type="Texture2D" uid="uid://d1s75kt3q127r" path="res://rulers/portrait.png" id="10_6iypd"]
-[ext_resource type="Script" uid="uid://b8k3nax2p4n7q" path="res://watermill_panel.gd" id="11_watermill"]
+[ext_resource type="Script" path="res://watermill_panel.gd" id="11_watermill"]
 [ext_resource type="FontFile" uid="uid://82ojj4rv8isv" path="res://fonts/EBGaramond-Regular.ttf" id="13_garamond_regular"]
 [ext_resource type="FontFile" uid="uid://du2aoedfa7vkk" path="res://fonts/EBGaramond-Bold.ttf" id="14_garamond_bold"]
 [ext_resource type="Texture2D" uid="uid://bywcfp1ih83tf" path="res://images/tech/watermill.png" id="14_wlxy5"]
@@ -26,8 +27,13 @@ radiance_size = 4
 background_mode = 2
 sky = SubResource("Sky_bklfy")
 ambient_light_source = 1
+ambient_light_energy = 0.6
 tonemap_mode = 2
 tonemap_white = 1.5
+ssao_enabled = true
+ssao_radius = 0.3
+ssao_intensity = 4.0
+ssao_light_affect = 0.5
 fog_enabled = true
 fog_light_color = Color(0.7, 0.8, 0.9, 1)
 fog_density = 0.002
@@ -136,6 +142,7 @@ grid_height = 100
 hex_height = 0.25
 gap_size = 0.0
 color_water = Color(0.05882353, 0.2784314, 0.3882353, 0.8784314)
+grass_texture = ExtResource("5_3v7ru")
 grass_texture_scale = 0.5
 land_percentage = 0.465
 noise_scale = 0.12
