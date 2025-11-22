@@ -26,28 +26,9 @@ void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
 	
-	// Animate waves using multiple sine waves for more natural look
-	float time = TIME * wave_speed;
-	vec2 wave_uv = UV * wave_scale;
-	
-	// Primary wave
-	float wave1 = sin(wave_uv.x * wave_frequency + time) * cos(wave_uv.y * wave_frequency * 0.7 + time * 0.8);
-	
-	// Secondary wave for complexity
-	float wave2 = sin(wave_uv.x * wave_frequency * 1.3 + time * 1.1) * cos(wave_uv.y * wave_frequency * 0.9 + time * 0.9);
-	
-	// Combine waves
-	float wave_height = (wave1 * 0.7 + wave2 * 0.3) * wave_amplitude;
-	
-	// Apply wave displacement
-	VERTEX.y += wave_height;
-	
-	// Calculate normal for proper lighting (simplified)
-	NORMAL = normalize(vec3(
-		-cos(wave_uv.x * wave_frequency + time) * sin(wave_uv.y * wave_frequency * 0.7 + time * 0.8) * wave_amplitude * wave_frequency,
-		1.0,
-		-sin(wave_uv.x * wave_frequency + time) * cos(wave_uv.y * wave_frequency * 0.7 + time * 0.8) * wave_amplitude * wave_frequency
-	));
+	// Keep the water surface flat (no animated waves) to avoid distracting moving highlights.
+	// Geometry stays still; reflections are handled entirely in the fragment shader.
+	NORMAL = vec3(0.0, 1.0, 0.0);
 }
 
 void fragment() {
@@ -67,10 +48,8 @@ void fragment() {
 	vec3 final_color = mix(water_color, sky_color, fresnel * reflection_strength);
 	
 	// Add foam effect at wave peaks
-	float time = TIME * wave_speed;
-	vec2 wave_uv = UV * wave_scale;
-	float wave_value = sin(wave_uv.x * wave_frequency + time) * cos(wave_uv.y * wave_frequency * 0.7 + time * 0.8);
-	float foam = smoothstep(foam_threshold, 1.0, wave_value) * foam_intensity;
+	// Disable time-based foam animation to keep lighting/static highlights calm.
+	float foam = 0.0;
 	final_color = mix(final_color, vec3(1.0), foam);
 	
 	ALBEDO = final_color;

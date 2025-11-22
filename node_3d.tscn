@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=13 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://dgfthppy3x5tv" path="res://subdivided_plane.gd" id="1_3djyb"]
 [ext_resource type="Script" uid="uid://dci8lfo4sk8xp" path="res://plane_controller.gd" id="2_mh8ky"]
@@ -33,6 +33,9 @@ metallic = 0.05
 roughness = 0.05
 clearcoat_roughness = 0.03
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_seafloor"]
+albedo_color = Color(0.05, 0.12, 0.1, 1)
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
 shader = ExtResource("5_vignette_shader")
 shader_parameter/vignette_intensity = 1.0
@@ -47,11 +50,18 @@ script = ExtResource("2_mh8ky")
 environment = SubResource("Environment_tippv")
 
 [node name="SubdividedPlane" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.36, 0)
 material_override = SubResource("StandardMaterial3D_g8wqy")
 script = ExtResource("1_3djyb")
 size = Vector2(120, 120)
 subdivisions = Vector2i(120, 120)
+
+[node name="SeaFloor" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.01, 0)
+material_override = SubResource("StandardMaterial3D_seafloor")
+script = ExtResource("1_3djyb")
+size = Vector2(140, 140)
+subdivisions = Vector2i(20, 20)
 
 [node name="HexagonGrid" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
