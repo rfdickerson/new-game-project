@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=28 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://dgfthppy3x5tv" path="res://subdivided_plane.gd" id="1_3djyb"]
 [ext_resource type="Script" uid="uid://dci8lfo4sk8xp" path="res://plane_controller.gd" id="2_mh8ky"]
@@ -11,7 +11,9 @@
 [ext_resource type="Texture2D" uid="uid://e66hnxd2q2fy" path="res://textures/gold2.png" id="9_6iypd"]
 [ext_resource type="Texture2D" uid="uid://d1s75kt3q127r" path="res://rulers/portrait.png" id="10_6iypd"]
 [ext_resource type="Script" uid="uid://b8k3nax2p4n7q" path="res://watermill_panel.gd" id="11_watermill"]
-[ext_resource type="Texture2D" uid="uid://cpwt6tbepdyaj" path="res://textures/milll.png" id="12_mill"]
+[ext_resource type="FontFile" uid="uid://82ojj4rv8isv" path="res://fonts/EBGaramond-Regular.ttf" id="13_garamond_regular"]
+[ext_resource type="FontFile" uid="uid://du2aoedfa7vkk" path="res://fonts/EBGaramond-Bold.ttf" id="14_garamond_bold"]
+[ext_resource type="Texture2D" uid="uid://bywcfp1ih83tf" path="res://images/tech/watermill.png" id="14_wlxy5"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_skybox"]
 panorama = ExtResource("6_skybox")
@@ -56,17 +58,6 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.4, 0.3, 0.2, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tan_panel"]
-bg_color = Color(0.9, 0.82, 0.7, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.5, 0.4, 0.3, 1)
-shadow_color = Color(0, 0, 0, 0.5)
-shadow_size = 20
-shadow_offset = Vector2(0, 8)
-
 [sub_resource type="FontVariation" id="FontVariation_garamond"]
 base_font = ExtResource("8_garamond")
 opentype_features = {
@@ -90,6 +81,31 @@ border_color = Color(0.1, 0.2, 0.4, 1)
 shadow_color = Color(0, 0, 0, 0.15)
 shadow_size = 4
 shadow_offset = Vector2(0, 2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tan_panel"]
+bg_color = Color(0.9, 0.82, 0.7, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.4, 0.3, 1)
+shadow_color = Color(0, 0, 0, 0.5)
+shadow_size = 20
+shadow_offset = Vector2(0, 8)
+
+[sub_resource type="FontVariation" id="FontVariation_garamond_regular"]
+base_font = ExtResource("13_garamond_regular")
+opentype_features = {
+"liga": 1,
+"onum": 1
+}
+
+[sub_resource type="FontVariation" id="FontVariation_garamond_bold"]
+base_font = ExtResource("14_garamond_bold")
+opentype_features = {
+"liga": 1,
+"onum": 1
+}
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("2_mh8ky")
@@ -272,30 +288,33 @@ theme_override_constants/separation = 15
 
 [node name="TitleLabel" type="RichTextLabel" parent="UILayer/WatermillPanel/VBoxContainer"]
 layout_mode = 2
-theme_override_font_sizes/normal_font_size = 32
 theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_fonts/normal_font = SubResource("FontVariation_garamond_regular")
+theme_override_fonts/bold_font = SubResource("FontVariation_garamond_bold")
+theme_override_font_sizes/normal_font_size = 32
 bbcode_enabled = true
 text = "[b]The Watermill[/b]"
 
 [node name="WatermillImage" type="TextureRect" parent="UILayer/WatermillPanel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
-texture = ExtResource("12_mill")
+texture = ExtResource("14_wlxy5")
 expand_mode = 2
 stretch_mode = 5
 
 [node name="DescriptionLabel" type="RichTextLabel" parent="UILayer/WatermillPanel/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_font_sizes/normal_font_size = 18
 theme_override_colors/default_color = Color(0, 0, 0, 1)
+theme_override_fonts/normal_font = SubResource("FontVariation_garamond_regular")
+theme_override_fonts/bold_font = SubResource("FontVariation_garamond_bold")
+theme_override_font_sizes/normal_font_size = 18
 bbcode_enabled = true
 text = "Description"
-scroll_active = true
 
 [node name="CloseButton" type="Button" parent="UILayer/WatermillPanel/VBoxContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0, 0, 0, 1)
-theme_override_colors/font_hover_color = Color(0.2, 0.2, 0.2, 1)
 theme_override_colors/font_pressed_color = Color(0.1, 0.1, 0.1, 1)
+theme_override_colors/font_hover_color = Color(0.2, 0.2, 0.2, 1)
 text = "Close (ESC)"

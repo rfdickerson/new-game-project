@@ -25,6 +25,9 @@ func _setup_ui():
 	if description_label:
 		description_label.text = """[color=black]The watermill is one of humanity's earliest mechanical inventions, harnessing the energy of flowing water to perform tasks such as grinding grain into flour.
 
+[font_size=24][b]Game Bonus[/b][/font_size]
+[b]+1 to food for every farm tile[/b]
+
 [font_size=24][b]Ancient Origins[/b][/font_size]
 The earliest recorded use of watermills dates to the 3rd century BC in ancient Greece. The Greek engineer Philo of Byzantium described a water-driven wheel in his technical treatises. By the 1st century BC, the Romans had adopted and refined this technology, utilizing watermills extensively across their empire.
 
@@ -74,4 +77,3 @@ func _input(event):
 		elif event.keycode == KEY_ESCAPE and is_visible:
 			hide_panel()
 			get_viewport().set_input_as_handled()
-
