@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=20 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://dgfthppy3x5tv" path="res://subdivided_plane.gd" id="1_3djyb"]
 [ext_resource type="Script" uid="uid://dci8lfo4sk8xp" path="res://plane_controller.gd" id="2_mh8ky"]
@@ -8,6 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://1vrxwvixh7au" path="res://textures/sunny_rose_garden_1k.exr" id="6_skybox"]
 [ext_resource type="Script" uid="uid://c74v0h4beaiwg" path="res://game_ui.gd" id="7_game_ui"]
 [ext_resource type="FontFile" uid="uid://baubrtgwtnyh3" path="res://EBGaramond-VariableFont_wght.ttf" id="8_garamond"]
+[ext_resource type="Texture2D" uid="uid://dbo5qoifnupmd" path="res://rulers/alex.jpg" id="9_alex"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_skybox"]
 panorama = ExtResource("6_skybox")
@@ -52,17 +53,6 @@ border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.27, 0.16, 0.08, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_toolbar"]
-bg_color = Color(0.05, 0.1, 0.25, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.1, 0.2, 0.4, 1)
-shadow_color = Color(0, 0, 0, 0.3)
-shadow_size = 8
-shadow_offset = Vector2(0, 4)
-
 [sub_resource type="FontVariation" id="FontVariation_garamond"]
 base_font = ExtResource("8_garamond")
 opentype_features = {
@@ -75,6 +65,17 @@ default_font = SubResource("FontVariation_garamond")
 default_font_size = 24
 Label/colors/font_color = Color(1, 1, 1, 1)
 Panel/styles/panel = SubResource("StyleBoxFlat_parchment")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_toolbar"]
+bg_color = Color(0.05, 0.1, 0.25, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.1, 0.2, 0.4, 1)
+shadow_color = Color(0, 0, 0, 0.15)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("2_mh8ky")
@@ -186,3 +187,31 @@ vertical_alignment = 1
 layout_mode = 2
 text = "Turn: 1"
 vertical_alignment = 1
+
+[node name="LeftPanel" type="Panel" parent="UILayer"]
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_top = 50.0
+offset_right = 200.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_toolbar")
+
+[node name="GridContainer" type="GridContainer" parent="UILayer/LeftPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RulerPortrait" type="TextureRect" parent="UILayer/LeftPanel/GridContainer"]
+custom_minimum_size = Vector2(200, 200)
+layout_mode = 2
+texture = ExtResource("9_alex")
+expand_mode = 2
+stretch_mode = 4
