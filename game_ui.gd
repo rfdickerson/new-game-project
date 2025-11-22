@@ -13,7 +13,7 @@ func _ready():
 
 func update_ui():
 	if gold_label:
-		gold_label.text = "%d" % gold
+		gold_label.text = "Gold: %d" % gold
 	if year_label:
 		year_label.text = "Year: %d" % year
 	if turn_label:
