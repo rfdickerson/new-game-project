@@ -3,15 +3,15 @@ extends Camera3D
 ## Camera controller optimized for strategy tile games like Civilization or Settlers of Catan
 ## Provides smooth isometric-style camera controls
 
-@export var camera_distance: float = 18.0  ## Distance from target
-@export var camera_height: float = 12.0  ## Height above ground
+@export var camera_distance: float = 5.0  ## Distance from target
+@export var camera_height: float = 4.0  ## Height above ground
 @export var camera_angle: float = 45.0  ## Angle from horizontal (degrees)
 @export var rotation_speed: float = 60.0  ## Degrees per second
 @export var pan_speed: float = 10.0  ## Units per second
 @export var zoom_speed: float = 5.0  ## Units per second
-@export var min_distance: float = 10.0
+@export var min_distance: float = 2.0
 @export var max_distance: float = 40.0
-@export var min_height: float = 8.0
+@export var min_height: float = 2.0
 @export var max_height: float = 25.0
 
 var target_position: Vector3 = Vector3.ZERO

@@ -145,7 +145,7 @@ func generate_hex_grid():
 	material.transparency = 1  # Use alpha from vertex colors
 	material.metallic = 0.05
 	material.roughness = 0.85  # More matte, less shiny for better readability
-	material.cull_mode = BaseMaterial3D.CULL_DISABLED  # Show both sides
+	material.cull_mode = BaseMaterial3D.CULL_BACK  # Standard back-face culling
 	material.albedo_color = Color(1.0, 1.0, 1.0, 1.0)  # White base for vertex colors to show through
 	# Note: specular is controlled via metallic and roughness in Godot 4
 	
@@ -166,11 +166,11 @@ func _darken_color(base_color: Color, intensity: float) -> Color:
 func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array, 
 				 colors: PackedColorArray, indices: PackedInt32Array,
 				 center: Vector3, radius: float, color: Color, vertex_offset: int):
-	"""Add a single hexagon to the mesh arrays"""
+	"""Add a single solid hexagon (top cap, bottom cap, and sides) to the mesh arrays."""
 	
 	# Generate 6 vertices around the hexagon (flat-top orientation)
-	var hex_vertices_top = []
-	var hex_vertices_bottom = []
+	var hex_vertices_top: Array[Vector3] = []
+	var hex_vertices_bottom: Array[Vector3] = []
 	
 	for i in range(6):
 		# For flat-top hexagons, start at 30° and increment by 60°
@@ -185,34 +185,33 @@ func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array,
 		# Bottom surface
 		hex_vertices_bottom.append(Vector3(x, center.y - hex_height * 0.5, z))
 	
-	# Add center vertex for top
+	# ----- TOP CAP -----
+	# Center vertex for top
 	var center_top = Vector3(center.x, center.y + hex_height * 0.5, center.z)
 	vertices.append(center_top)
 	normals.append(Vector3(0, 1, 0))
-	# Keep the center close to the original color so tiles read clearly
 	colors.append(color)
 	
-	# Add outer vertices for top
+	# Outer ring vertices for top
 	for i in range(6):
 		vertices.append(hex_vertices_top[i])
 		normals.append(Vector3(0, 1, 0))
-		# Darken the rim slightly for a soft AO look
 		if ao_enabled and ao_edge_intensity > 0.0:
 			colors.append(_darken_color(color, ao_edge_intensity))
 		else:
 			colors.append(color)
 	
-	# Add center vertex for bottom
+	# ----- BOTTOM CAP -----
+	# Center vertex for bottom
 	var center_bottom = Vector3(center.x, center.y - hex_height * 0.5, center.z)
 	vertices.append(center_bottom)
 	normals.append(Vector3(0, -1, 0))
-	# Underside is darker – suggests contact shadow against the water
 	if ao_enabled and ao_bottom_intensity > 0.0:
 		colors.append(_darken_color(color, ao_bottom_intensity))
 	else:
 		colors.append(color)
 	
-	# Add outer vertices for bottom
+	# Outer ring vertices for bottom
 	for i in range(6):
 		vertices.append(hex_vertices_bottom[i])
 		normals.append(Vector3(0, -1, 0))
@@ -221,27 +220,30 @@ func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array,
 		else:
 			colors.append(color)
 	
-	# Create triangles for top surface
+	# ----- INDICES -----
+	# Top fan (counter-clockwise when viewed from above)
 	for i in range(6):
 		var next_i = (i + 1) % 6
-		indices.append(vertex_offset)  # Center
-		indices.append(vertex_offset + i + 1)
-		indices.append(vertex_offset + next_i + 1)
+		indices.append(vertex_offset)  # Center top
+		indices.append(vertex_offset + i + 1)  # Vertex i
+		indices.append(vertex_offset + next_i + 1)  # Vertex next_i
 	
-	# Create triangles for bottom surface (reversed winding)
+	# Bottom fan (reverse of top)
+	var bottom_center = vertex_offset + 7
 	for i in range(6):
 		var next_i = (i + 1) % 6
-		indices.append(vertex_offset + 7)  # Center bottom
-		indices.append(vertex_offset + 7 + next_i + 1)
-		indices.append(vertex_offset + 7 + i + 1)
+		indices.append(bottom_center)  # Center bottom
+		indices.append(bottom_center + next_i + 1)  # Vertex next_i
+		indices.append(bottom_center + i + 1)  # Vertex i
 	
-	# Create side faces
+	# Side faces (use shared top/bottom ring vertices)
 	for i in range(6):
 		var next_i = (i + 1) % 6
+		
 		var top1 = vertex_offset + i + 1
 		var top2 = vertex_offset + next_i + 1
-		var bottom1 = vertex_offset + 7 + i + 1
-		var bottom2 = vertex_offset + 7 + next_i + 1
+		var bottom1 = bottom_center + i + 1
+		var bottom2 = bottom_center + next_i + 1
 		
 		# First triangle
 		indices.append(top1)

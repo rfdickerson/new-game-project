@@ -71,7 +71,7 @@ box_projection = true
 origin_offset = Vector3(0, -1, 0)
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.8038565, 0.5948226, 0, -0.5948226, 0.8038565, 0.96, 12, 18)
+transform = Transform3D(1, 0, 0, 0, 0.8038565, 0.5948226, 0, -0.5948226, 0.8038565, 0.96, 4, 5)
 script = ExtResource("4_camera")
 current = true
 fov = 65.0
