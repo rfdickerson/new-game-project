@@ -8,6 +8,7 @@ const WATER_ANIMATED_SHADER := preload("res://water_animated.gdshader")
 @onready var plane = $SubdividedPlane
 @onready var hex_grid = $HexagonGrid
 @onready var game_ui = $UILayer/GameUI
+@onready var watermill_panel = $UILayer/WatermillPanel
 
 func _ready():
 	_apply_water_shader()
@@ -31,6 +32,7 @@ func _ready():
 	print("  [P] - More ocean")
 	print("  [N] - Adjust noise scale (terrain size)")
 	print("  [Enter] - Next Turn")
+	print("  [F] - Show Watermill Information")
 
 var wave_enabled = false
 var time_elapsed = 0.0
