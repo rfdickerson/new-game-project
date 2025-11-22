@@ -1,6 +1,6 @@
 extends Control
 
-@onready var gold_label: Label = $HBoxContainer/GoldLabel
+@onready var gold_label: Label = $HBoxContainer/GoldContainer/GoldLabel
 @onready var year_label: Label = $HBoxContainer/YearLabel
 @onready var turn_label: Label = $HBoxContainer/TurnLabel
 
@@ -13,7 +13,7 @@ func _ready():
 
 func update_ui():
 	if gold_label:
-		gold_label.text = "Gold: %d" % gold
+		gold_label.text = "%d" % gold
 	if year_label:
 		year_label.text = "Year: %d" % year
 	if turn_label:
