@@ -5,7 +5,7 @@
 [ext_resource type="Script" uid="uid://cjm3h5x8qw7yk" path="res://hexagon_grid.gd" id="3_hexgrid"]
 [ext_resource type="Script" uid="uid://c1vewl8x26427" path="res://strategy_camera.gd" id="4_camera"]
 [ext_resource type="Texture2D" uid="uid://du823vv3j5ami" path="res://textures/grass.png" id="4_jka67"]
-[ext_resource type="Shader" path="res://vignette_postprocess.gdshader" id="5_vignette_shader"]
+[ext_resource type="Shader" uid="uid://crm628pnootga" path="res://vignette_postprocess.gdshader" id="5_vignette_shader"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_hqk3q"]
 ground_color = Color(0.2, 0.3, 0.35, 1)
@@ -25,10 +25,6 @@ fog_enabled = true
 fog_light_color = Color(0.7, 0.8, 0.9, 1)
 fog_density = 0.002
 fog_aerial_perspective = 0.1
-dof_blur_far_enabled = true
-dof_blur_far_distance = 25.0
-dof_blur_far_transition = 15.0
-dof_blur_far_amount = 0.6
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_g8wqy"]
 transparency = 1
@@ -39,6 +35,10 @@ clearcoat_roughness = 0.03
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_vignette"]
 shader = ExtResource("5_vignette_shader")
+shader_parameter/vignette_intensity = 1.0
+shader_parameter/vignette_center = Vector2(0.5, 0.5)
+shader_parameter/vignette_radius = 0.75
+shader_parameter/vignette_smoothness = 0.4
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("2_mh8ky")
@@ -61,6 +61,7 @@ grid_width = 100
 grid_height = 100
 hex_height = 0.25
 gap_size = 0.0
+color_water = Color(0.05882353, 0.2784314, 0.3882353, 0.8784314)
 grass_texture = ExtResource("4_jka67")
 grass_texture_scale = 0.16
 land_percentage = 0.465
@@ -91,14 +92,8 @@ directional_shadow_max_distance = 50.0
 [node name="PostProcessLayer" type="CanvasLayer" parent="."]
 
 [node name="PostProcessRect" type="ColorRect" parent="PostProcessLayer"]
+material = SubResource("ShaderMaterial_vignette")
 anchors_preset = 15
-anchor_left = 0.0
-anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 0.0
-offset_top = 0.0
-offset_right = 0.0
-offset_bottom = 0.0
 mouse_filter = 2
-material = SubResource("ShaderMaterial_vignette")

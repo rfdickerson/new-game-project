@@ -149,7 +149,10 @@ func generate_hex_grid():
 	# Create material with better properties for strategy game
 	var material = StandardMaterial3D.new()
 	material.vertex_color_use_as_albedo = true
-	material.transparency = 1  # Use alpha from vertex colors
+	# Keep hex tiles fully opaque so depth testing works correctly.
+	# Using alpha blending here causes per-mesh transparency sorting,
+	# which makes distant hex sides pop in front of nearer ones at grazing angles.
+	material.transparency = BaseMaterial3D.TRANSPARENCY_DISABLED
 	material.metallic = 0.05
 	material.roughness = 0.85  # More matte, less shiny for better readability
 	material.cull_mode = BaseMaterial3D.CULL_BACK  # Standard back-face culling
