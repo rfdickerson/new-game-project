@@ -44,17 +44,21 @@ void fragment() {
 	float depth_factor = clamp(length(UV - vec2(0.5)) * 2.0, 0.0, 1.0);
 	vec3 water_color = mix(shallow_color, deep_color, depth_factor);
 	
-	// Add sky reflection
-	vec3 final_color = mix(water_color, sky_color, fresnel * reflection_strength);
+	// Calculate reflection vector
+	vec3 reflect_dir = reflect(-view_dir, normal);
 	
-	// Add foam effect at wave peaks
-	// Disable time-based foam animation to keep lighting/static highlights calm.
-	float foam = 0.0;
-	final_color = mix(final_color, vec3(1.0), foam);
+	// Make the base albedo darker so reflections show through better
+	// The PBR system will add reflections on top based on METALLIC/ROUGHNESS
+	ALBEDO = water_color * 0.5;  // Darken significantly to let reflections dominate
 	
-	ALBEDO = final_color;
-	METALLIC = 0.2;
-	ROUGHNESS = 0.1;  // Smooth but not perfectly mirror-like
+	// Set very high metallic and very low roughness for strong reflections
+	// This should make the reflection probe's sky reflection very visible
+	METALLIC = 0.9;  // Very high metallic for mirror-like reflections
+	ROUGHNESS = 0.01;  // Extremely smooth surface for clear sky reflections
+	
+	// Use fresnel to control reflection strength via specular
+	SPECULAR = fresnel * reflection_strength;
+	
 	ALPHA = alpha;
 }
 

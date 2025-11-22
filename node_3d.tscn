@@ -79,10 +79,12 @@ noise_scale = 0.12
 
 [node name="ReflectionProbe" type="ReflectionProbe" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
-intensity = 1.2
+update_mode = 1
+intensity = 2.0
 size = Vector3(130, 30, 130)
 origin_offset = Vector3(0, -1, 0)
 box_projection = true
+enable_shadows = true
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.8038565, 0.5948226, 0, -0.5948226, 0.8038565, 0.96, 4, 5)
