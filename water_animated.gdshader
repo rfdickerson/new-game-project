@@ -19,12 +19,20 @@ uniform float wave_scale : hint_range(0.0, 1.0) = 0.5;
 uniform float foam_threshold : hint_range(0.0, 1.0) = 0.7;
 uniform float foam_intensity : hint_range(0.0, 1.0) = 0.3;
 
+// Normal map
+uniform sampler2D normal_map : hint_normal;
+uniform float normal_scale : hint_range(0.0, 2.0) = 1.0;
+uniform float normal_speed : hint_range(0.0, 5.0) = 0.5;
+uniform vec2 normal_tiling = vec2(2.0, 2.0);
+
 varying vec3 world_position;
 varying vec3 world_normal;
+varying vec2 uv_coords;
 
 void vertex() {
 	world_position = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	world_normal = normalize((MODEL_MATRIX * vec4(NORMAL, 0.0)).xyz);
+	uv_coords = UV;
 	
 	// Keep the water surface flat (no animated waves) to avoid distracting moving highlights.
 	// Geometry stays still; reflections are handled entirely in the fragment shader.
@@ -32,10 +40,29 @@ void vertex() {
 }
 
 void fragment() {
-	vec3 normal = normalize(NORMAL);
+	// Sample normal map with tiled UV coordinates (no animation)
+	vec2 normal_uv = uv_coords * normal_tiling;
+	vec3 normal_map_sample = texture(normal_map, normal_uv).rgb;
+	
+	// Convert normal map from [0,1] to [-1,1] range
+	vec3 normal_map_normal = normalize(normal_map_sample * 2.0 - 1.0);
+	
+	// Create tangent space basis
+	vec3 N = normalize(NORMAL);
+	vec3 T = normalize(cross(N, vec3(0.0, 0.0, 1.0)));
+	if (length(T) < 0.01) {
+		T = normalize(cross(N, vec3(1.0, 0.0, 0.0)));
+	}
+	vec3 B = normalize(cross(N, T));
+	mat3 TBN = mat3(T, B, N);
+	
+	// Transform normal map to world space and blend with base normal
+	vec3 perturbed_normal = normalize(TBN * normal_map_normal);
+	vec3 normal = normalize(mix(N, perturbed_normal, normal_scale));
+	
 	vec3 view_dir = normalize(-VIEW);
 	
-	// Calculate fresnel for edge reflection
+	// Calculate fresnel for edge reflection using perturbed normal
 	float fresnel = pow(clamp(1.0 - dot(view_dir, normal), 0.0, 1.0), fresnel_power);
 	
 	// Depth-based coloring (simulate shallow/deep water)
@@ -44,7 +71,7 @@ void fragment() {
 	float depth_factor = clamp(length(UV - vec2(0.5)) * 2.0, 0.0, 1.0);
 	vec3 water_color = mix(shallow_color, deep_color, depth_factor);
 	
-	// Calculate reflection vector
+	// Calculate reflection vector using perturbed normal for more realistic reflections
 	vec3 reflect_dir = reflect(-view_dir, normal);
 	
 	// Make the base albedo darker so reflections show through better
@@ -53,6 +80,8 @@ void fragment() {
 	
 	// Set very high metallic and very low roughness for strong reflections
 	// This should make the reflection probe's sky reflection very visible
+	// Use perturbed normal for realistic reflections and lighting
+	NORMAL = normal;
 	METALLIC = 0.9;  // Very high metallic for mirror-like reflections
 	ROUGHNESS = 0.01;  // Extremely smooth surface for clear sky reflections
 	

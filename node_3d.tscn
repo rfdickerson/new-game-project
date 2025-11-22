@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=28 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://dgfthppy3x5tv" path="res://subdivided_plane.gd" id="1_3djyb"]
 [ext_resource type="Script" uid="uid://dci8lfo4sk8xp" path="res://plane_controller.gd" id="2_mh8ky"]
@@ -9,9 +9,8 @@
 [ext_resource type="Texture2D" uid="uid://1vrxwvixh7au" path="res://textures/sunny_rose_garden_1k.exr" id="6_skybox"]
 [ext_resource type="Script" uid="uid://c74v0h4beaiwg" path="res://game_ui.gd" id="7_game_ui"]
 [ext_resource type="FontFile" uid="uid://baubrtgwtnyh3" path="res://EBGaramond-VariableFont_wght.ttf" id="8_garamond"]
-[ext_resource type="Texture2D" uid="uid://e66hnxd2q2fy" path="res://textures/gold2.png" id="9_6iypd"]
 [ext_resource type="Texture2D" uid="uid://d1s75kt3q127r" path="res://rulers/portrait.png" id="10_6iypd"]
-[ext_resource type="Script" path="res://watermill_panel.gd" id="11_watermill"]
+[ext_resource type="Script" uid="uid://b8k3nax2p4n7q" path="res://watermill_panel.gd" id="11_watermill"]
 [ext_resource type="FontFile" uid="uid://82ojj4rv8isv" path="res://fonts/EBGaramond-Regular.ttf" id="13_garamond_regular"]
 [ext_resource type="FontFile" uid="uid://du2aoedfa7vkk" path="res://fonts/EBGaramond-Bold.ttf" id="14_garamond_bold"]
 [ext_resource type="Texture2D" uid="uid://bywcfp1ih83tf" path="res://images/tech/watermill.png" id="14_wlxy5"]
@@ -88,6 +87,13 @@ shadow_color = Color(0, 0, 0, 0.3)
 shadow_size = 4
 shadow_offset = Vector2(0, 2)
 
+[sub_resource type="FontVariation" id="FontVariation_garamond_bold"]
+base_font = ExtResource("14_garamond_bold")
+opentype_features = {
+"liga": 1,
+"onum": 1
+}
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tan_panel"]
 bg_color = Color(0.9, 0.82, 0.7, 1)
 border_width_left = 2
@@ -101,21 +107,6 @@ shadow_offset = Vector2(0, 8)
 
 [sub_resource type="FontVariation" id="FontVariation_garamond_regular"]
 base_font = ExtResource("13_garamond_regular")
-opentype_features = {
-"liga": 1,
-"onum": 1
-}
-
-[sub_resource type="FontVariation" id="FontVariation_garamond_smallcaps"]
-base_font = ExtResource("13_garamond_regular")
-opentype_features = {
-"liga": 1,
-"onum": 1,
-"smcp": 1
-}
-
-[sub_resource type="FontVariation" id="FontVariation_garamond_bold"]
-base_font = ExtResource("14_garamond_bold")
 opentype_features = {
 "liga": 1,
 "onum": 1
@@ -224,22 +215,22 @@ theme_override_constants/separation = 8
 
 [node name="GoldLabel" type="Label" parent="UILayer/GameUI/HBoxContainer/GoldContainer"]
 layout_mode = 2
-theme_override_fonts/font = SubResource("FontVariation_garamond_bold")
 theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
+theme_override_fonts/font = SubResource("FontVariation_garamond_bold")
 text = "Gold: 0"
 vertical_alignment = 1
 
 [node name="YearLabel" type="Label" parent="UILayer/GameUI/HBoxContainer"]
 layout_mode = 2
-theme_override_fonts/font = SubResource("FontVariation_garamond_bold")
 theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
-text = "Year: 0"
+theme_override_fonts/font = SubResource("FontVariation_garamond_bold")
+text = "Year: 1700"
 vertical_alignment = 1
 
 [node name="TurnLabel" type="Label" parent="UILayer/GameUI/HBoxContainer"]
 layout_mode = 2
-theme_override_fonts/font = SubResource("FontVariation_garamond_bold")
 theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
+theme_override_fonts/font = SubResource("FontVariation_garamond_bold")
 text = "Turn: 1"
 vertical_alignment = 1
 

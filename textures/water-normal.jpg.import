@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dnmes0xkmkswv"
-path="res://.godot/imported/grass2.jpg-bda7be3ea318b7bf3526b0e9c85b9f49.ctex"
+uid="uid://dvchcrdd51wsx"
+path="res://.godot/imported/water-normal.jpg-65d20966214d5d77e490eaa48eb3d752.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://textures/grass2.jpg"
-dest_files=["res://.godot/imported/grass2.jpg-bda7be3ea318b7bf3526b0e9c85b9f49.ctex"]
+source_file="res://textures/water-normal.jpg"
+dest_files=["res://.godot/imported/water-normal.jpg-65d20966214d5d77e490eaa48eb3d752.ctex"]
 
 [params]
 
@@ -22,7 +22,7 @@ compress/uastc_level=0
 compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
-compress/channel_pack=0
+compress/channel_pack=1
 mipmaps/generate=true
 mipmaps/limit=-1
 roughness/mode=0

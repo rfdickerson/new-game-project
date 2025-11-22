@@ -169,6 +169,16 @@ func _apply_water_shader():
 	# Foam
 	shader_material.set_shader_parameter("foam_threshold", 0.75)
 	shader_material.set_shader_parameter("foam_intensity", 0.25)
+	
+	# Normal map for improved water surface detail and reflections
+	var normal_map_texture = load("res://textures/water-normal.jpg")
+	if normal_map_texture:
+		shader_material.set_shader_parameter("normal_map", normal_map_texture)
+		shader_material.set_shader_parameter("normal_scale", 1.0)
+		shader_material.set_shader_parameter("normal_speed", 0.3)
+		shader_material.set_shader_parameter("normal_tiling", Vector2(3.0, 3.0))
+	else:
+		print("Warning: Could not load water-normal.jpg")
 
 	plane.material_override = shader_material
 	plane.generate_plane()

@@ -5,7 +5,7 @@ extends Control
 @onready var turn_label: Label = $HBoxContainer/TurnLabel
 
 var gold: int = 0
-var year: int = 2000
+var year: int = 1700
 var turn: int = 1
 
 func _ready():
