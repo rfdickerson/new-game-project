@@ -1,18 +1,12 @@
-[gd_scene load_steps=8 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=9 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://dgfthppy3x5tv" path="res://subdivided_plane.gd" id="1_3djyb"]
 [ext_resource type="Script" uid="uid://dci8lfo4sk8xp" path="res://plane_controller.gd" id="2_mh8ky"]
 [ext_resource type="Script" uid="uid://cjm3h5x8qw7yk" path="res://hexagon_grid.gd" id="3_hexgrid"]
-[ext_resource type="Script" path="res://strategy_camera.gd" id="4_camera"]
+[ext_resource type="Script" uid="uid://c1vewl8x26427" path="res://strategy_camera.gd" id="4_camera"]
 
 [sub_resource type="PhysicalSkyMaterial" id="PhysicalSkyMaterial_hqk3q"]
-sky_energy_multiplier = 1.2
 ground_color = Color(0.2, 0.3, 0.35, 1)
-sky_horizon_color = Color(0.5, 0.7, 0.9, 1)
-sky_top_color = Color(0.3, 0.5, 0.8, 1)
-ground_horizon_color = Color(0.4, 0.5, 0.6, 1)
-sun_angle_max = 45.0
-sun_curve = 0.5
 
 [sub_resource type="Sky" id="Sky_bklfy"]
 sky_material = SubResource("PhysicalSkyMaterial_hqk3q")
@@ -27,7 +21,6 @@ tonemap_mode = 2
 tonemap_white = 1.5
 fog_enabled = true
 fog_light_color = Color(0.7, 0.8, 0.9, 1)
-fog_sun_color = Color(1, 0.95, 0.8, 1)
 fog_density = 0.002
 fog_aerial_perspective = 0.1
 
@@ -64,17 +57,16 @@ noise_scale = 0.12
 
 [node name="ReflectionProbe" type="ReflectionProbe" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
-update_mode = 0
 intensity = 1.2
 size = Vector3(130, 30, 130)
-box_projection = true
 origin_offset = Vector3(0, -1, 0)
+box_projection = true
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.8038565, 0.5948226, 0, -0.5948226, 0.8038565, 0.96, 12, 18)
-script = ExtResource("4_camera")
 current = true
 fov = 65.0
+script = ExtResource("4_camera")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, -0.75, 0.433013, 0, 10, 0)

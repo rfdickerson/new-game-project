@@ -16,6 +16,8 @@ extends Camera3D
 
 var target_position: Vector3 = Vector3.ZERO
 var current_rotation: float = 0.0  # Rotation around Y axis (degrees)
+var is_dragging: bool = false
+var last_mouse_position: Vector2 = Vector2.ZERO
 
 func _ready():
 	_update_camera_position()
@@ -31,6 +33,32 @@ func _input(event):
 			camera_distance = clamp(camera_distance + zoom_speed * 0.5, min_distance, max_distance)
 			camera_height = clamp(camera_height + zoom_speed * 0.3, min_height, max_height)
 			_update_camera_position()
+		# Handle mouse button press/release for drag panning
+		elif event.button_index == MOUSE_BUTTON_LEFT or event.button_index == MOUSE_BUTTON_MIDDLE:
+			if event.pressed:
+				is_dragging = true
+				last_mouse_position = event.position
+			else:
+				is_dragging = false
+	
+	# Handle mouse movement for drag panning
+	if event is InputEventMouseMotion:
+		if is_dragging:
+			var mouse_delta = last_mouse_position - event.position
+			# Convert mouse movement to pan direction
+			var pan_direction = Vector2(mouse_delta.x, mouse_delta.y)
+			# Rotate pan direction based on camera rotation
+			var rotation_rad = deg_to_rad(current_rotation)
+			var rotated_pan = Vector3(
+				pan_direction.x * cos(rotation_rad) - pan_direction.y * sin(rotation_rad),
+				0,
+				pan_direction.x * sin(rotation_rad) + pan_direction.y * cos(rotation_rad)
+			)
+			# Apply panning with sensitivity
+			var pan_sensitivity = pan_speed * 0.01  # Adjust sensitivity as needed
+			target_position += rotated_pan * pan_sensitivity
+			_update_camera_position()
+			last_mouse_position = event.position
 
 func _process(delta):
 	var input_rotation = 0.0

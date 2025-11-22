@@ -24,10 +24,10 @@ func _ready():
 	print("  [G] - Regenerate terrain (new random seed)")
 	print("  [+] - Increase hex grid size")
 	print("  [-] - Decrease hex grid size")
-	print("  [Q] - Increase hex radius")
-	print("  [A] - Decrease hex radius")
+	print("  [I] - Increase hex radius")
+	print("  [O] - Decrease hex radius")
 	print("  [L] - More land")
-	print("  [O] - More ocean")
+	print("  [P] - More ocean")
 	print("  [N] - Adjust noise scale (terrain size)")
 
 var wave_enabled = false
@@ -102,12 +102,12 @@ func _input(event):
 				hex_grid.generate_hex_grid()
 				print("Grid size: %dx%d" % [hex_grid.grid_width, hex_grid.grid_height])
 			
-			KEY_Q:
+			KEY_I:
 				hex_grid.hex_radius += 0.05
 				hex_grid.generate_hex_grid()
 				print("Hex radius: %.2f" % hex_grid.hex_radius)
 			
-			KEY_A:
+			KEY_O:
 				hex_grid.hex_radius = max(0.1, hex_grid.hex_radius - 0.05)
 				hex_grid.generate_hex_grid()
 				print("Hex radius: %.2f" % hex_grid.hex_radius)
@@ -117,7 +117,7 @@ func _input(event):
 				hex_grid.generate_hex_grid()
 				print("Land percentage: %.1f%%" % (hex_grid.land_percentage * 100))
 			
-			KEY_O:
+			KEY_P:
 				hex_grid.land_percentage = max(0.1, hex_grid.land_percentage - 0.1)
 				hex_grid.generate_hex_grid()
 				print("Land percentage: %.1f%%" % (hex_grid.land_percentage * 100))
