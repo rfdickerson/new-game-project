@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=29 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://dgfthppy3x5tv" path="res://subdivided_plane.gd" id="1_3djyb"]
 [ext_resource type="Script" uid="uid://dci8lfo4sk8xp" path="res://plane_controller.gd" id="2_mh8ky"]
@@ -14,6 +14,7 @@
 [ext_resource type="FontFile" uid="uid://82ojj4rv8isv" path="res://fonts/EBGaramond-Regular.ttf" id="13_garamond_regular"]
 [ext_resource type="FontFile" uid="uid://du2aoedfa7vkk" path="res://fonts/EBGaramond-Bold.ttf" id="14_garamond_bold"]
 [ext_resource type="Texture2D" uid="uid://bywcfp1ih83tf" path="res://images/tech/watermill.png" id="14_wlxy5"]
+[ext_resource type="Texture2D" uid="uid://5nd6ug05eyrr" path="res://textures/heightmap.png" id="15_heightmap"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_skybox"]
 panorama = ExtResource("6_skybox")
@@ -30,8 +31,8 @@ ambient_light_energy = 0.6
 tonemap_mode = 2
 tonemap_white = 1.5
 ssao_enabled = true
-ssao_radius = 0.3
-ssao_intensity = 4.0
+ssao_radius = 0.8
+ssao_intensity = 18.0
 ssao_light_affect = 0.5
 fog_enabled = true
 fog_light_color = Color(0.7, 0.8, 0.9, 1)
@@ -119,7 +120,7 @@ script = ExtResource("2_mh8ky")
 environment = SubResource("Environment_tippv")
 
 [node name="SubdividedPlane" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.36, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.82, 0)
 material_override = SubResource("StandardMaterial3D_g8wqy")
 script = ExtResource("1_3djyb")
 size = Vector2(120, 120)
@@ -133,7 +134,6 @@ size = Vector2(140, 140)
 subdivisions = Vector2i(20, 20)
 
 [node name="HexagonGrid" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
 script = ExtResource("3_hexgrid")
 hex_radius = 0.45
 grid_width = 100
@@ -143,6 +143,9 @@ gap_size = 0.0
 color_water = Color(0.05882353, 0.2784314, 0.3882353, 0.8784314)
 grass_texture = ExtResource("5_3v7ru")
 grass_texture_scale = 0.5
+heightmap_texture = ExtResource("15_heightmap")
+height_scale = 2.0
+base_height_offset = 0.0
 land_percentage = 0.465
 noise_scale = 0.12
 
@@ -151,7 +154,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
 update_mode = 1
 intensity = 2.0
 size = Vector3(130, 30, 130)
-origin_offset = Vector3(0, -1, 0)
+origin_offset = Vector3(0, 0.925, 0)
 box_projection = true
 enable_shadows = true
 

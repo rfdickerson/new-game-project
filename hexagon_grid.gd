@@ -25,6 +25,15 @@ extends MeshInstance3D
 @export var grass_texture: Texture2D
 @export var grass_texture_scale: float = 2.0  ## How many times the grass texture repeats across a single hex
 
+## Heightmap settings
+@export var heightmap_texture: Texture2D  ## Heightmap image to use for terrain elevation
+@export var height_scale: float = 5.0  ## Maximum height displacement in world units
+@export var use_heightmap: bool = true  ## Use heightmap instead of noise for terrain generation
+@export var heightmap_water_threshold: float = 0.3  ## Heightmap value below which is considered water (0-1)
+@export var base_height_offset: float = -2.0  ## Base height offset for all tiles (negative = lower, allows tiles in water)
+@export var sea_level: float = 0.36  ## Sea level height (should match water plane Y position)
+@export var extend_from_sea_level: bool = true  ## Make tiles extend from sea level to heightmap elevation
+
 ## Terrain generation settings
 @export var land_percentage: float = 0.4  ## Percentage of map that should be land (0.0 to 1.0)
 @export var noise_scale: float = 0.15  ## Scale of terrain noise (lower = larger land masses)
@@ -63,23 +72,66 @@ func generate_hex_grid():
 	# Adjust for gap
 	var adjusted_radius = hex_radius - gap_size
 	
-	# Setup noise for procedural terrain generation
+	# Get heightmap image if available
+	var heightmap_image: Image = null
+	if use_heightmap and heightmap_texture:
+		heightmap_image = heightmap_texture.get_image()
+		if heightmap_image:
+			heightmap_image.decompress()
+	
+	# Setup noise for procedural terrain generation (fallback if no heightmap)
 	var noise = FastNoiseLite.new()
-	if noise_seed == 0:
-		noise.seed = randi()
-	else:
-		noise.seed = noise_seed
-	noise.noise_type = FastNoiseLite.TYPE_PERLIN
-	noise.frequency = noise_scale
+	if not use_heightmap or not heightmap_image:
+		if noise_seed == 0:
+			noise.seed = randi()
+		else:
+			noise.seed = noise_seed
+		noise.noise_type = FastNoiseLite.TYPE_PERLIN
+		noise.frequency = noise_scale
+	
+	# Calculate grid bounds for UV mapping
+	var total_width = grid_width * horizontal_spacing
+	var total_height = grid_height * vertical_spacing
 	
 	# Generate terrain height map
 	var terrain_map = []
 	for row in range(grid_height):
 		terrain_map.append([])
 		for col in range(grid_width):
-			var noise_value = noise.get_noise_2d(float(col), float(row))
-			# Normalize from [-1, 1] to [0, 1]
-			var height_value = (noise_value + 1.0) * 0.5
+			var height_value: float
+			
+			if use_heightmap and heightmap_image:
+				# Calculate hex center position for UV mapping
+				var x_offset = 0.0
+				if row % 2 == 1:
+					x_offset = horizontal_spacing * 0.5
+				
+				var center_x = col * horizontal_spacing + x_offset
+				var center_z = row * vertical_spacing
+				
+				# Center the position
+				center_x -= (grid_width * horizontal_spacing) * 0.5
+				center_z -= (grid_height * vertical_spacing) * 0.5
+				
+				# Convert to UV coordinates (0-1 range)
+				var u = (center_x / total_width) + 0.5
+				var v = (center_z / total_height) + 0.5
+				
+				# Clamp UV to [0, 1]
+				u = clamp(u, 0.0, 1.0)
+				v = clamp(v, 0.0, 1.0)
+				
+				# Sample heightmap
+				var pixel_x = int(u * (heightmap_image.get_width() - 1))
+				var pixel_y = int(v * (heightmap_image.get_height() - 1))
+				var pixel_color = heightmap_image.get_pixel(pixel_x, pixel_y)
+				height_value = pixel_color.r  # Use red channel for grayscale
+			else:
+				# Use noise as fallback
+				var noise_value = noise.get_noise_2d(float(col), float(row))
+				# Normalize from [-1, 1] to [0, 1]
+				height_value = (noise_value + 1.0) * 0.5
+			
 			terrain_map[row].append(height_value)
 	
 	# Generate each hexagon in the grid
@@ -97,41 +149,78 @@ func generate_hex_grid():
 			center_x -= (grid_width * horizontal_spacing) * 0.5
 			center_z -= (grid_height * vertical_spacing) * 0.5
 			
-			# Get terrain type based on noise value
+			# Get terrain type and height from heightmap/noise value
 			var height = terrain_map[row][col]
 			var hex_color: Color
-			var y_offset = 0.0
+			var y_offset = base_height_offset
 			var is_water = false
 			
-			if height < (1.0 - land_percentage):
-				# Deep water - skip hexagon, show water plane instead
-				is_water = true
-			elif height < (1.0 - land_percentage + 0.05):
-				# Shallow water / coast - skip hexagon, show water plane
+			# Calculate base Y offset from heightmap if using heightmap
+			if use_heightmap and heightmap_image:
+				# Use heightmap value directly for elevation, added to base offset
+				y_offset = base_height_offset + (height * height_scale)
+			
+			# Determine terrain type based on height value
+			var water_threshold: float
+			if use_heightmap and heightmap_image:
+				# For heightmap, use the configured water threshold
+				# Darker areas (lower values) in heightmap = water
+				water_threshold = heightmap_water_threshold
+			else:
+				# For noise, use land_percentage-based threshold
+				water_threshold = (1.0 - land_percentage)
+			
+			# Only skip very deep water tiles (well below water level)
+			# Allow shallow/coastal tiles to render even if partially underwater
+			if height < water_threshold - 0.1:
+				# Very deep water - skip hexagon, show water plane instead
 				is_water = true
 			elif height < (1.0 - land_percentage + 0.15):
 				# Beach / sand
 				hex_color = color_sand
-				y_offset = 0.0
+				if not use_heightmap or not heightmap_image:
+					y_offset = 0.0
 			elif height < (1.0 - land_percentage + 0.45):
 				# Grassland
 				hex_color = color_grass
-				y_offset = 0.08
+				if not use_heightmap or not heightmap_image:
+					y_offset = 0.08
 			elif height < (1.0 - land_percentage + 0.7):
 				# Forest
 				hex_color = color_forest
-				y_offset = 0.22
+				if not use_heightmap or not heightmap_image:
+					y_offset = 0.22
 			else:
 				# Mountains
 				hex_color = color_mountain
-				y_offset = 0.35
+				if not use_heightmap or not heightmap_image:
+					y_offset = 0.35
 			
 			# Only create hexagon for land tiles (skip water)
 			if not is_water:
-				# Create hexagon at this position
-				add_hexagon(vertices, normals, uvs, colors, indices,
-						Vector3(center_x, y_offset, center_z),
-						adjusted_radius, hex_color, vertex_offset)
+				# Calculate tile position and height
+				var tile_center_y: float
+				var tile_height: float
+				
+				if extend_from_sea_level and use_heightmap and heightmap_image:
+					# Make tile extend from sea level up to heightmap elevation
+					var tile_top = y_offset
+					var tile_bottom = min(sea_level, base_height_offset)
+					
+					# Ensure tile extends at least from base to top
+					tile_bottom = min(tile_bottom, tile_top - 0.1)  # Minimum 0.1 height
+					
+					tile_height = tile_top - tile_bottom
+					tile_center_y = (tile_top + tile_bottom) * 0.5
+				else:
+					# Use standard tile height
+					tile_center_y = y_offset
+					tile_height = hex_height
+				
+				# Create hexagon at this position with calculated height
+				add_hexagon_with_height(vertices, normals, uvs, colors, indices,
+						Vector3(center_x, tile_center_y, center_z),
+						adjusted_radius, hex_color, vertex_offset, tile_height)
 				
 				vertex_offset += 14  # 7 vertices top + 7 vertices bottom
 
@@ -190,6 +279,12 @@ func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array,
 		uvs: PackedVector2Array, colors: PackedColorArray, indices: PackedInt32Array,
 		center: Vector3, radius: float, color: Color, vertex_offset: int):
 	"""Add a single solid hexagon (top cap, bottom cap, and sides) to the mesh arrays."""
+	add_hexagon_with_height(vertices, normals, uvs, colors, indices, center, radius, color, vertex_offset, hex_height)
+
+func add_hexagon_with_height(vertices: PackedVector3Array, normals: PackedVector3Array,
+		uvs: PackedVector2Array, colors: PackedColorArray, indices: PackedInt32Array,
+		center: Vector3, radius: float, color: Color, vertex_offset: int, tile_height: float):
+	"""Add a single solid hexagon with custom height (top cap, bottom cap, and sides) to the mesh arrays."""
 	
 	# Generate 6 vertices around the hexagon (flat-top orientation)
 	var hex_vertices_top: Array[Vector3] = []
@@ -204,13 +299,13 @@ func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array,
 		var z = center.z + radius * sin(angle_rad)
 		
 		# Top surface
-		hex_vertices_top.append(Vector3(x, center.y + hex_height * 0.5, z))
+		hex_vertices_top.append(Vector3(x, center.y + tile_height * 0.5, z))
 		# Bottom surface
-		hex_vertices_bottom.append(Vector3(x, center.y - hex_height * 0.5, z))
+		hex_vertices_bottom.append(Vector3(x, center.y - tile_height * 0.5, z))
 	
 	# ----- TOP CAP -----
 	# Center vertex for top
-	var center_top = Vector3(center.x, center.y + hex_height * 0.5, center.z)
+	var center_top = Vector3(center.x, center.y + tile_height * 0.5, center.z)
 	vertices.append(center_top)
 	normals.append(Vector3(0, 1, 0))
 	uvs.append(Vector2(0.5, 0.5))
@@ -229,7 +324,7 @@ func add_hexagon(vertices: PackedVector3Array, normals: PackedVector3Array,
 	
 	# ----- BOTTOM CAP -----
 	# Center vertex for bottom
-	var center_bottom = Vector3(center.x, center.y - hex_height * 0.5, center.z)
+	var center_bottom = Vector3(center.x, center.y - tile_height * 0.5, center.z)
 	vertices.append(center_bottom)
 	normals.append(Vector3(0, -1, 0))
 	uvs.append(Vector2(0.5, 0.5))
