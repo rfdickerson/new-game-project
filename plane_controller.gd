@@ -2,10 +2,13 @@ extends Node3D
 
 ## Example controller to demonstrate dynamic plane manipulation
 
+const WATER_SHADER := preload("res://water_reflection.gdshader")
+
 @onready var plane = $SubdividedPlane
 @onready var hex_grid = $HexagonGrid
 
 func _ready():
+	_apply_water_shader()
 	print("=== CONTROLS ===")
 	print("Water Plane:")
 	print("  [1] - Decrease subdivisions")
@@ -124,6 +127,31 @@ func _input(event):
 					hex_grid.noise_scale = 0.05
 				hex_grid.generate_hex_grid()
 				print("Noise scale: %.2f (lower = larger landmasses)" % hex_grid.noise_scale)
+
+func _get_sky_color() -> Color:
+	var env = get_world_3d().environment
+	if env and env.sky and env.sky is PhysicalSkyMaterial:
+		return env.sky.sky_top_color
+	return Color(0.38, 0.65, 0.88)
+
+func _apply_water_shader():
+	var shader_material = ShaderMaterial.new()
+	shader_material.shader = WATER_SHADER
+
+	var base_color_vec = Vector3(0.06, 0.35, 0.5)
+	if plane.material_override is StandardMaterial3D:
+		var existing = plane.material_override as StandardMaterial3D
+		base_color_vec = Vector3(existing.albedo_color.r, existing.albedo_color.g, existing.albedo_color.b)
+
+	shader_material.set_shader_parameter("base_color", base_color_vec)
+	var sky_color = _get_sky_color()
+	shader_material.set_shader_parameter("sky_color", Vector3(sky_color.r, sky_color.g, sky_color.b))
+	shader_material.set_shader_parameter("alpha", 0.85)
+	shader_material.set_shader_parameter("reflection_strength", 0.3)  # Reduced for more subtle reflection
+	shader_material.set_shader_parameter("fresnel_power", 2.4)
+
+	plane.material_override = shader_material
+	plane.generate_plane()
 
 func animate_waves():
 	"""Example of animating the plane vertices with a wave effect"""

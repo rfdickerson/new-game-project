@@ -47,11 +47,12 @@ land_percentage = 0.45
 noise_scale = 0.12
 
 [node name="ReflectionProbe" type="ReflectionProbe" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
-update_mode = 1
-intensity = 1.1
-size = Vector3(30, 20, 30)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
+update_mode = 0
+intensity = 1.2
+size = Vector3(30, 25, 30)
 box_projection = true
+origin_offset = Vector3(0, -1, 0)
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.8038565, 0.5948226, 0, -0.5948226, 0.8038565, 0.96, 12, 18)

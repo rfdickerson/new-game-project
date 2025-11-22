@@ -4,7 +4,7 @@ extends MeshInstance3D
 @export var hex_radius: float = 0.5  ## Radius of each hexagon
 @export var grid_width: int = 10  ## Number of hexagons in width
 @export var grid_height: int = 10  ## Number of hexagons in height
-@export var hex_height: float = 0.05  ## Height/thickness of hexagon tiles
+@export var hex_height: float = 0.15  ## Height/thickness of hexagon tiles
 @export var gap_size: float = 0.02  ## Gap between hexagons
 @export var auto_generate: bool = true
 
@@ -107,18 +107,18 @@ func generate_hex_grid():
 				# Beach / sand
 				hex_color = color_sand
 				y_offset = 0.0
-			elif height < (1.0 - land_percentage + 0.5):
+			elif height < (1.0 - land_percentage + 0.45):
 				# Grassland
 				hex_color = color_grass
-				y_offset = 0.05
+				y_offset = 0.08
 			elif height < (1.0 - land_percentage + 0.7):
 				# Forest
 				hex_color = color_forest
-				y_offset = 0.1
+				y_offset = 0.22
 			else:
 				# Mountains
 				hex_color = color_mountain
-				y_offset = 0.2
+				y_offset = 0.35
 			
 			# Only create hexagon for land tiles (skip water)
 			if not is_water:
