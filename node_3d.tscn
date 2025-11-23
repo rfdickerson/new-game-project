@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=30 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://dgfthppy3x5tv" path="res://subdivided_plane.gd" id="1_3djyb"]
 [ext_resource type="Script" uid="uid://dci8lfo4sk8xp" path="res://plane_controller.gd" id="2_mh8ky"]
@@ -10,10 +10,12 @@
 [ext_resource type="Script" uid="uid://c74v0h4beaiwg" path="res://game_ui.gd" id="7_game_ui"]
 [ext_resource type="FontFile" uid="uid://baubrtgwtnyh3" path="res://EBGaramond-VariableFont_wght.ttf" id="8_garamond"]
 [ext_resource type="Texture2D" uid="uid://d1s75kt3q127r" path="res://rulers/portrait.png" id="10_6iypd"]
-[ext_resource type="Script" uid="uid://b8k3nax2p4n7q" path="res://watermill_panel.gd" id="11_watermill"]
+[ext_resource type="Script" path="res://watermill_panel.gd" id="11_watermill"]
+[ext_resource type="Script" uid="uid://cwko0c2dwdghm" path="res://left_panel.gd" id="12_left_panel"]
 [ext_resource type="FontFile" uid="uid://82ojj4rv8isv" path="res://fonts/EBGaramond-Regular.ttf" id="13_garamond_regular"]
 [ext_resource type="FontFile" uid="uid://du2aoedfa7vkk" path="res://fonts/EBGaramond-Bold.ttf" id="14_garamond_bold"]
 [ext_resource type="Texture2D" uid="uid://bywcfp1ih83tf" path="res://images/tech/watermill.png" id="14_wlxy5"]
+[ext_resource type="Texture2D" uid="uid://cjsemj77ucnij" path="res://images/cities/colony.png" id="15_city_colony"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_skybox"]
 panorama = ExtResource("6_skybox")
@@ -94,6 +96,13 @@ opentype_features = {
 "onum": 1
 }
 
+[sub_resource type="FontVariation" id="FontVariation_garamond_regular"]
+base_font = ExtResource("13_garamond_regular")
+opentype_features = {
+"liga": 1,
+"onum": 1
+}
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_tan_panel"]
 bg_color = Color(0.9, 0.82, 0.7, 1)
 border_width_left = 2
@@ -104,13 +113,6 @@ border_color = Color(0.5, 0.4, 0.3, 1)
 shadow_color = Color(0, 0, 0, 0.25)
 shadow_size = 8
 shadow_offset = Vector2(0, 4)
-
-[sub_resource type="FontVariation" id="FontVariation_garamond_regular"]
-base_font = ExtResource("13_garamond_regular")
-opentype_features = {
-"liga": 1,
-"onum": 1
-}
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("2_mh8ky")
@@ -238,29 +240,87 @@ vertical_alignment = 1
 anchors_preset = 9
 anchor_bottom = 1.0
 offset_top = 50.0
-offset_right = 200.0
+offset_right = 260.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_toolbar")
+script = ExtResource("12_left_panel")
 
-[node name="GridContainer" type="GridContainer" parent="UILayer/LeftPanel"]
+[node name="VBoxContainer" type="VBoxContainer" parent="UILayer/LeftPanel"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
+offset_left = 16.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = -16.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 15
 
-[node name="RulerPortrait" type="TextureRect" parent="UILayer/LeftPanel/GridContainer"]
-custom_minimum_size = Vector2(200, 200)
+[node name="RulerPortrait" type="TextureRect" parent="UILayer/LeftPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 200)
 layout_mode = 2
 texture = ExtResource("10_6iypd")
 expand_mode = 2
 stretch_mode = 5
+
+[node name="CityInfoContainer" type="VBoxContainer" parent="UILayer/LeftPanel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CityImage" type="TextureRect" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+texture = ExtResource("15_city_colony")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="CityNameLabel" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
+theme_override_fonts/font = SubResource("FontVariation_garamond_bold")
+theme_override_font_sizes/font_size = 24
+text = "Alexandria"
+
+[node name="PopulationLabel" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
+theme_override_fonts/font = SubResource("FontVariation_garamond_regular")
+text = "Population: 1000"
+
+[node name="FoodLabel" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
+theme_override_fonts/font = SubResource("FontVariation_garamond_regular")
+text = "Food: 50"
+
+[node name="ProductionLabel" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
+theme_override_fonts/font = SubResource("FontVariation_garamond_regular")
+text = "Production: 25/turn"
+
+[node name="GoldIncomeLabel" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
+theme_override_fonts/font = SubResource("FontVariation_garamond_regular")
+text = "Gold Income: +15/turn"
+
+[node name="HSeparator" type="HSeparator" parent="UILayer/LeftPanel/VBoxContainer"]
+layout_mode = 2
+
+[node name="NextTurnButton" type="Button" parent="UILayer/LeftPanel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
+theme_override_colors/font_pressed_color = Color(0.7, 0.6, 0.4, 1)
+theme_override_colors/font_hover_color = Color(1, 0.85, 0.65, 1)
+theme_override_fonts/font = SubResource("FontVariation_garamond_bold")
+theme_override_font_sizes/font_size = 24
+text = "Next Turn"
 
 [node name="WatermillPanel" type="Panel" parent="UILayer"]
 anchors_preset = 8

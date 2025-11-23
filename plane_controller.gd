@@ -9,9 +9,13 @@ const WATER_ANIMATED_SHADER := preload("res://water_animated.gdshader")
 @onready var hex_grid = $HexagonGrid
 @onready var game_ui = $UILayer/GameUI
 @onready var watermill_panel = $UILayer/WatermillPanel
+@onready var left_panel = $UILayer/LeftPanel
 
 func _ready():
 	_apply_water_shader()
+	# Connect left panel to game UI
+	if left_panel and game_ui:
+		left_panel.set_game_ui(game_ui)
 	print("=== CONTROLS ===")
 	print("Water Plane:")
 	print("  [1] - Decrease subdivisions")
