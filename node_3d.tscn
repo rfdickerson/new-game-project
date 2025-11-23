@@ -1,4 +1,4 @@
-[gd_scene load_steps=30 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=31 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://dgfthppy3x5tv" path="res://subdivided_plane.gd" id="1_3djyb"]
 [ext_resource type="Script" uid="uid://dci8lfo4sk8xp" path="res://plane_controller.gd" id="2_mh8ky"]
@@ -16,6 +16,7 @@
 [ext_resource type="FontFile" uid="uid://du2aoedfa7vkk" path="res://fonts/EBGaramond-Bold.ttf" id="14_garamond_bold"]
 [ext_resource type="Texture2D" uid="uid://bywcfp1ih83tf" path="res://images/tech/watermill.png" id="14_wlxy5"]
 [ext_resource type="Texture2D" uid="uid://cjsemj77ucnij" path="res://images/cities/colony.png" id="15_city_colony"]
+[ext_resource type="Script" path="res://city.gd" id="16_city"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_skybox"]
 panorama = ExtResource("6_skybox")
@@ -147,6 +148,13 @@ grass_texture = ExtResource("5_3v7ru")
 grass_texture_scale = 0.5
 land_percentage = 0.465
 noise_scale = 0.12
+
+[node name="City" type="MeshInstance3D" parent="."]
+script = ExtResource("16_city")
+hex_col = 50
+hex_row = 50
+city_size = 0.3
+city_color = Color(0.7, 0.5, 0.3, 1)
 
 [node name="ReflectionProbe" type="ReflectionProbe" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)

@@ -29,6 +29,7 @@ extends MeshInstance3D
 @export var land_percentage: float = 0.4  ## Percentage of map that should be land (0.0 to 1.0)
 @export var noise_scale: float = 0.15  ## Scale of terrain noise (lower = larger land masses)
 @export var noise_seed: int = 0  ## Seed for random generation (0 = random)
+var actual_noise_seed: int = 0  ## The actual seed used during generation (stored for consistency)
 
 func _ready():
 	if auto_generate:
@@ -66,8 +67,10 @@ func generate_hex_grid():
 	# Setup noise for procedural terrain generation
 	var noise = FastNoiseLite.new()
 	if noise_seed == 0:
-		noise.seed = randi()
+		actual_noise_seed = randi()
+		noise.seed = actual_noise_seed
 	else:
+		actual_noise_seed = noise_seed
 		noise.seed = noise_seed
 	noise.noise_type = FastNoiseLite.TYPE_PERLIN
 	noise.frequency = noise_scale
@@ -307,3 +310,46 @@ func get_hex_at_world_position(world_pos: Vector3) -> Vector2i:
 	var col = int(round((adjusted_x - x_offset) / horizontal_spacing))
 	
 	return Vector2i(col, row)
+
+func is_hex_land(col: int, row: int) -> bool:
+	"""Check if a hex tile at the given coordinates is land (not water)"""
+	# Bounds check
+	if col < 0 or col >= grid_width or row < 0 or row >= grid_height:
+		return false
+	
+	# Regenerate noise with the same parameters as generate_hex_grid()
+	var noise = FastNoiseLite.new()
+	noise.seed = actual_noise_seed  # Use the actual seed that was used during generation
+	noise.noise_type = FastNoiseLite.TYPE_PERLIN
+	noise.frequency = noise_scale
+	
+	# Get noise value for this coordinate
+	var noise_value = noise.get_noise_2d(float(col), float(row))
+	var height = (noise_value + 1.0) * 0.5  # Normalize from [-1, 1] to [0, 1]
+	
+	# Check if it's land (same logic as generate_hex_grid)
+	# Water is: height < (1.0 - land_percentage + 0.05)
+	# Land is: height >= (1.0 - land_percentage + 0.05)
+	return height >= (1.0 - land_percentage + 0.05)
+
+func find_nearby_land_hex(start_col: int, start_row: int, max_radius: int = 10) -> Vector2i:
+	"""Find the nearest land hex tile, searching outward from the start position"""
+	# Check the starting position first
+	if is_hex_land(start_col, start_row):
+		return Vector2i(start_col, start_row)
+	
+	# Search in expanding rings
+	for radius in range(1, max_radius + 1):
+		# Check all hexes in a ring around the start position
+		for col_offset in range(-radius, radius + 1):
+			for row_offset in range(-radius, radius + 1):
+				# Only check hexes on the ring (not inside)
+				var dist = max(abs(col_offset), abs(row_offset))
+				if dist == radius:
+					var check_col = start_col + col_offset
+					var check_row = start_row + row_offset
+					if is_hex_land(check_col, check_row):
+						return Vector2i(check_col, check_row)
+	
+	# If no land found, return the start position anyway
+	return Vector2i(start_col, start_row)
