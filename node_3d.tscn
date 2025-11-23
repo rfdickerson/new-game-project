@@ -149,12 +149,14 @@ grass_texture_scale = 0.5
 land_percentage = 0.465
 noise_scale = 0.12
 
-[node name="City" type="MeshInstance3D" parent="."]
+[node name="City" type="Node3D" parent="."]
 script = ExtResource("16_city")
 hex_col = 50
 hex_row = 50
-city_size = 0.3
+building_count = 6
+base_building_size = 0.15
 city_color = Color(0.7, 0.5, 0.3, 1)
+color_variation = 0.2
 
 [node name="ReflectionProbe" type="ReflectionProbe" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
