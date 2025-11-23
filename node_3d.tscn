@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3 uid="uid://mgp02mkor0at"]
+[gd_scene load_steps=32 format=3 uid="uid://mgp02mkor0at"]
 
 [ext_resource type="Script" uid="uid://dgfthppy3x5tv" path="res://subdivided_plane.gd" id="1_3djyb"]
 [ext_resource type="Script" uid="uid://dci8lfo4sk8xp" path="res://plane_controller.gd" id="2_mh8ky"]
@@ -17,6 +17,7 @@
 [ext_resource type="Texture2D" uid="uid://bywcfp1ih83tf" path="res://images/tech/watermill.png" id="14_wlxy5"]
 [ext_resource type="Texture2D" uid="uid://cjsemj77ucnij" path="res://images/cities/colony.png" id="15_city_colony"]
 [ext_resource type="Script" path="res://city.gd" id="16_city"]
+[ext_resource type="Script" path="res://forest_manager.gd" id="17_forest"]
 
 [sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_skybox"]
 panorama = ExtResource("6_skybox")
@@ -157,6 +158,16 @@ building_count = 6
 base_building_size = 0.15
 city_color = Color(0.7, 0.5, 0.3, 1)
 color_variation = 0.2
+
+[node name="ForestManager" type="Node3D" parent="."]
+script = ExtResource("17_forest")
+tree_count = 300
+trunk_height = 0.3
+trunk_width = 0.05
+leaves_size = 0.2
+trunk_color = Color(0.4, 0.25, 0.15, 1)
+leaves_color = Color(0.2, 0.6, 0.2, 1)
+size_variation = 0.3
 
 [node name="ReflectionProbe" type="ReflectionProbe" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 0)
