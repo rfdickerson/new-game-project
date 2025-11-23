@@ -268,11 +268,13 @@ stretch_mode = 5
 
 [node name="CityInfoContainer" type="VBoxContainer" parent="UILayer/LeftPanel/VBoxContainer"]
 layout_mode = 2
+size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
 [node name="CityImage" type="TextureRect" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
 custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
+size_flags_horizontal = 3
 texture = ExtResource("15_city_colony")
 expand_mode = 2
 stretch_mode = 5
@@ -284,37 +286,81 @@ theme_override_fonts/font = SubResource("FontVariation_garamond_bold")
 theme_override_font_sizes/font_size = 24
 text = "Alexandria"
 
-[node name="PopulationLabel" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
+[node name="PopulationContainer" type="HBoxContainer" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
-theme_override_fonts/font = SubResource("FontVariation_garamond_regular")
-text = "Population: 1000"
+theme_override_constants/separation = 4
 
-[node name="FoodLabel" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
+[node name="PopulationLabel" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer/PopulationContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
-theme_override_fonts/font = SubResource("FontVariation_garamond_regular")
-text = "Food: 50"
+theme_override_fonts/font = SubResource("FontVariation_garamond_bold")
+text = "Population:"
 
-[node name="ProductionLabel" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
+[node name="PopulationValue" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer/PopulationContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
 theme_override_fonts/font = SubResource("FontVariation_garamond_regular")
-text = "Production: 25/turn"
+text = "1000"
 
-[node name="GoldIncomeLabel" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
+[node name="FoodContainer" type="HBoxContainer" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="FoodLabel" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer/FoodContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
+theme_override_fonts/font = SubResource("FontVariation_garamond_bold")
+text = "Food:"
+
+[node name="FoodValue" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer/FoodContainer"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
 theme_override_fonts/font = SubResource("FontVariation_garamond_regular")
-text = "Gold Income: +15/turn"
+text = "50"
+
+[node name="ProductionContainer" type="HBoxContainer" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="ProductionLabel" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer/ProductionContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
+theme_override_fonts/font = SubResource("FontVariation_garamond_bold")
+text = "Production:"
+
+[node name="ProductionValue" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer/ProductionContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
+theme_override_fonts/font = SubResource("FontVariation_garamond_regular")
+text = "25/turn"
+
+[node name="GoldIncomeContainer" type="HBoxContainer" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="GoldIncomeLabel" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer/GoldIncomeContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
+theme_override_fonts/font = SubResource("FontVariation_garamond_bold")
+text = "Gold Income:"
+
+[node name="GoldIncomeValue" type="Label" parent="UILayer/LeftPanel/VBoxContainer/CityInfoContainer/GoldIncomeContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
+theme_override_fonts/font = SubResource("FontVariation_garamond_regular")
+text = "+15/turn"
 
 [node name="HSeparator" type="HSeparator" parent="UILayer/LeftPanel/VBoxContainer"]
 layout_mode = 2
 
+[node name="Spacer" type="Control" parent="UILayer/LeftPanel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
 [node name="NextTurnButton" type="Button" parent="UILayer/LeftPanel/VBoxContainer"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-size_flags_vertical = 8
+size_flags_vertical = 0
 theme_override_colors/font_color = Color(0.9, 0.75, 0.5, 1)
 theme_override_colors/font_pressed_color = Color(0.7, 0.6, 0.4, 1)
 theme_override_colors/font_hover_color = Color(1, 0.85, 0.65, 1)
